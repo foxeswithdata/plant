@@ -161,7 +161,16 @@ make_FF16_hyperpar <- function(
     rho       <- with_default("rho")
     omega     <- with_default("omega")
     narea     <- with_default("narea", narea)
-
+    ## add my own parameters:
+    # a_s <-  with_default("a_s")
+    # print(a_s)
+    # t_s <-  with_default("t_s")
+    # 
+    # stress_mean <- 250/365
+    # stress_sd <- 25/365
+    
+    
+    
     ## lma / leaf turnover relationship:
     k_l   <- B_kl1 * (lma / lma_0) ^ (-B_kl2)
 
@@ -170,6 +179,10 @@ make_FF16_hyperpar <- function(
 
     ## rho / wood turnover relationship:
     k_s  <- B_ks1 *  (rho / rho_0) ^ (-B_ks2)
+    
+    
+    
+  
 
     ## rho / sapwood respiration relationship:
 

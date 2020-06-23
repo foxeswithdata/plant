@@ -5,6 +5,17 @@
 #define HEIGHT_INDEX 0
 #define MORTALITY_INDEX 1
 #define FECUNDITY_INDEX 2
+#define AREA_HEARTWOOD_INDEX 3
+#define MASS_HEARTWOOD_INDEX 4
+#define MASS_STORAGE_INDEX 5
+#define AREA_LEAF_INDEX 6
+#define MASS_LEAF_INDEX 7
+#define AREA_SAPWOOD_INDEX 8
+#define MASS_SAPWOOD_INDEX 9
+#define AREA_BARK_INDEX 10
+#define MASS_BARK_INDEX 11
+#define MASS_ROOT_INDEX 12
+
 
 #include <memory> // std::shared_ptr
 #include <plant/ode_interface.h>

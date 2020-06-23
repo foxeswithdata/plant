@@ -69,7 +69,9 @@ public:
 
   double net_mass_production_dt(const environment_type &environment) {
     // TODO:  maybe reuse intervals? default false 
-    return strategy->net_mass_production_dt(environment, state(HEIGHT_INDEX), aux("competition_effect"));
+    return strategy->net_mass_production_dt(environment, state(HEIGHT_INDEX), state(AREA_LEAF_INDEX), 
+                                            state(MASS_LEAF_INDEX), state(MASS_SAPWOOD_INDEX),
+                                            state(MASS_BARK_INDEX), state(MASS_ROOT_INDEX), aux("competition_effect"));
   }
 
   // * ODE interface
