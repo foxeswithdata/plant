@@ -1,8 +1,14 @@
-#include <plant/uniroot.h>
-#include <plant/qag.h>
+#include <memory>
+#include <plant/control.h>
+#include <plant/qag_internals.h> // quadrature::intervals_type
+#include <plant/internals.h> // quadrature::intervals_type
+#include <plant/strategy.h>
+#include <plant/models/ff16_environment.h>
 #include <plant/models/assimilation.h>
-#include <plant/models/ff16_strategy.h>
+
 #include <RcppCommon.h> // NA_REAL
+
+#include <iostream>
 
 namespace plant {
 
@@ -11,6 +17,10 @@ namespace plant {
 // before physiology, before compound things?)
 // TODO: Consider moving to activating as an initialisation list?
 FF16_Strategy::FF16_Strategy() {
+  using std::cout;
+  using std::cerr;
+  using std::endl;
+  cout << "FF16 strategy constructor" << endl;
   // * Core traits - default values
   lma       = 0.1978791;  // Leaf mass per area [kg / m2]
   rho       = 608.0;      // Wood density [kg/m3]
@@ -102,7 +112,7 @@ FF16_Strategy::FF16_Strategy() {
   collect_all_auxillary = false;
   // build the string state/aux name to index map
   refresh_indices();
-  name = "ES20";
+  name = "FF16";
 }
 
 void FF16_Strategy::refresh_indices () {
@@ -539,6 +549,8 @@ double FF16_Strategy::mortality_growth_dependent_dt(double storage_portion) cons
 
 // [eqn 20] Survival of seedlings during establishment
 double FF16_Strategy::establishment_probability(const FF16_Environment& environment) {
+  
+  //TODO: add dependency on stress
   const double net_mass_production_dt_ =
     net_mass_production_dt(environment, height_0, area_leaf_0,
                            mass_leaf_0, mass_sapwood_0,

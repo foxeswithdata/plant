@@ -433,8 +433,12 @@ FF16_Environment__set_seed_rain_index <- function(obj_, x) {
     invisible(.Call('_plant_FF16_Environment__set_seed_rain_index', PACKAGE = 'plant', obj_, x))
 }
 
-FF16_Environment__set_fixed_environment <- function(obj_, canopy_openness, height_max) {
-    invisible(.Call('_plant_FF16_Environment__set_fixed_environment', PACKAGE = 'plant', obj_, canopy_openness, height_max))
+FF16_Environment__set_fixed_environment <- function(obj_, value, height_max) {
+    invisible(.Call('_plant_FF16_Environment__set_fixed_environment', PACKAGE = 'plant', obj_, value, height_max))
+}
+
+FF16_Environment__prepare_stress <- function(obj_) {
+    invisible(.Call('_plant_FF16_Environment__prepare_stress', PACKAGE = 'plant', obj_))
 }
 
 FF16_Environment__patch_survival__get <- function(obj_) {
@@ -467,6 +471,30 @@ FF16_Environment__environment_interpolator__get <- function(obj_) {
 
 FF16_Environment__environment_interpolator__set <- function(obj_, value) {
     invisible(.Call('_plant_FF16_Environment__environment_interpolator__set', PACKAGE = 'plant', obj_, value))
+}
+
+FF16_Environment__stress_mean__get <- function(obj_) {
+    .Call('_plant_FF16_Environment__stress_mean__get', PACKAGE = 'plant', obj_)
+}
+
+FF16_Environment__stress_mean__set <- function(obj_, value) {
+    invisible(.Call('_plant_FF16_Environment__stress_mean__set', PACKAGE = 'plant', obj_, value))
+}
+
+FF16_Environment__stress_sd__get <- function(obj_) {
+    .Call('_plant_FF16_Environment__stress_sd__get', PACKAGE = 'plant', obj_)
+}
+
+FF16_Environment__stress_sd__set <- function(obj_, value) {
+    invisible(.Call('_plant_FF16_Environment__stress_sd__set', PACKAGE = 'plant', obj_, value))
+}
+
+FF16_Environment__stress_regime__get <- function(obj_) {
+    .Call('_plant_FF16_Environment__stress_regime__get', PACKAGE = 'plant', obj_)
+}
+
+FF16_Environment__stress_regime__set <- function(obj_, value) {
+    invisible(.Call('_plant_FF16_Environment__stress_regime__set', PACKAGE = 'plant', obj_, value))
 }
 
 Plant___FF16__FF16_Env__ctor <- function(s) {

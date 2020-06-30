@@ -254,7 +254,10 @@ Interpolator:
 FF16_Environment:
   name_cpp: "plant::FF16_Environment"
   constructor:
-    args: [disturbance_mean_interval: double, seed_rain: "std::vector<double>", k_I: double, control: "plant::Control"]
+    args: [disturbance_mean_interval: double, 
+           seed_rain: "std::vector<double>", 
+           k_I: double, 
+           control: "plant::Control"]
     roxygen: |
       FF16_Environment object
       @param disturbance_mean_interval mean disturbance interval in years
@@ -278,12 +281,17 @@ FF16_Environment:
     set_fixed_environment:
       args: [value: double, height_max: double]
       return_type: void
+    prepare_stress:
+      return_type: void
   active:
     patch_survival: {type: double, access: member}
     seed_rain_dt: {type: double, access: member}
     disturbance_regime: {type: "plant::Disturbance", access: field}
     time: {type: double, access: field}
     environment_interpolator: {type: "plant::interpolator::Interpolator", access: field}
+    stress_mean: {type: double, access: field}
+    stress_sd: {type: double, access: field}
+    stress_regime: {type: "std::vector<double>", access: field}
 
 
 
@@ -396,6 +404,8 @@ FF16_Strategy:
     - d_I: double
     - a_dG1: double
     - a_dG2: double
+    - a_s: double
+    - t_s: double 
     - control: "plant::Control" 
     - collect_all_auxillary: bool 
 

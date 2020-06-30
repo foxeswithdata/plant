@@ -385,6 +385,8 @@ template <> inline SEXP wrap(const plant::FF16_Strategy& x) {
   ret["d_I"] = Rcpp::wrap(x.d_I);
   ret["a_dG1"] = Rcpp::wrap(x.a_dG1);
   ret["a_dG2"] = Rcpp::wrap(x.a_dG2);
+  ret["a_s"] = Rcpp::wrap(x.a_s);
+  ret["t_s"] = Rcpp::wrap(x.t_s);
   ret["control"] = Rcpp::wrap(x.control);
   ret["collect_all_auxillary"] = Rcpp::wrap(x.collect_all_auxillary);
   ret.attr("class") = "FF16_Strategy";
@@ -459,6 +461,10 @@ template <> inline plant::FF16_Strategy as(SEXP x) {
   ret.a_dG1 = Rcpp::as<double >(xl["a_dG1"]);
   // ret.a_dG2 = Rcpp::as<decltype(reta_dG2) >(xl["a_dG2"]);
   ret.a_dG2 = Rcpp::as<double >(xl["a_dG2"]);
+  // ret.a_s = Rcpp::as<decltype(reta_s) >(xl["a_s"]);
+  ret.a_s = Rcpp::as<double >(xl["a_s"]);
+  // ret.t_s = Rcpp::as<decltype(rett_s) >(xl["t_s"]);
+  ret.t_s = Rcpp::as<double >(xl["t_s"]);
   // ret.control = Rcpp::as<decltype(retcontrol) >(xl["control"]);
   ret.control = Rcpp::as<plant::Control >(xl["control"]);
   // ret.collect_all_auxillary = Rcpp::as<decltype(retcollect_all_auxillary) >(xl["collect_all_auxillary"]);

@@ -18,7 +18,7 @@ public:
   FF16_Strategy();
 
   // update this when the length of state_names changes
-  static size_t state_size () { return 5; }
+  static size_t state_size () { return 15; }
   // update this when the length of aux_names changes
   size_t aux_size () { return aux_names().size(); }
 

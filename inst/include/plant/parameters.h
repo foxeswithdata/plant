@@ -10,6 +10,8 @@
 #include <plant/cohort_schedule.h>
 #include <plant/scm_utils.h> // Unfortunately needed for setup_cohort_schedule
 
+#include <iostream>
+
 // TODO: I will possibly move out the "Patch" parameters out into
 // their own simple list class at some point, to make this a bit more
 // coherent.
@@ -31,6 +33,10 @@ struct Parameters {
       disturbance_mean_interval(30),
       cohort_schedule_max_time(NA_REAL),
       hyperpar(hyperpar) {
+    using std::cout;
+    using std::cerr;
+    using std::endl;
+    cout << "param constructor 1" << endl;
         validate();
   }
 
@@ -91,41 +97,58 @@ size_t Parameters<T,E>::n_mutants() const {
 // a penalty.  So don't put anything too stupidly heavy in here.
 template <typename T, typename E>
 void Parameters<T,E>::validate() {
+  using std::cout;
+  using std::cerr;
+  using std::endl;
+  cout << "validate 1" << endl;
   const size_t n_spp = size();
-
+  cout << "validate 2" << endl;
   // Set some defaults and check lengths.  Number of strategies is
   // taken as the "true" size.
   if (seed_rain.empty()) {
+    cout << "validate empty seed" << endl;
     seed_rain = std::vector<double>(n_spp, 1.0);
   } else if (seed_rain.size() != n_spp) {
+    cout << "validate incorrect seed length" << endl;
     util::stop("Incorrect length seed_rain");
   }
   if (is_resident.empty()) {
+    cout << "validate resident empty" << endl;
     is_resident = std::vector<bool>(n_spp, true);
   } else if (is_resident.size() != n_spp) {
+    cout << "validate incorrect length resident" << endl;
     util::stop("Incorrect length is_resident");
   }
-
+  cout << "validate 3" << endl;
   setup_cohort_schedule();
+  cout << "validate cohort schedule" << endl;
   if (cohort_schedule_times.size() != n_spp) {
+    cout << "validate incorrect cohort schedule length" << endl;
     util::stop("Incorrect length cohort_schedule_times");
   }
   /* if (environment.empty()) { */
     /* environment = environment( */
   /* } */
 
+  cout << "validate 4" << endl;
+  
   // This is not a lot of checking, but should be enough.  There's no
   // way of telling if the function is a good idea without running it,
   // anyway.
   if (hyperpar != R_NilValue && !util::is_function(hyperpar)) {
+    cout << "validate 5" << endl;
     util::stop("hyperpar must be NULL or a function");
   }
 
   // Overwrite all strategy control objects so that they take the
   // Parameters' control object.
+  int i = 0;
   for (auto& s : strategies) {
+    i++;
+    cout << "validate i = " << i << endl;
     s.control = control;
   }
+  cout << "validate end" << endl;
 }
 
 // Separating this out just because it's a bit crap:
