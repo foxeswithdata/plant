@@ -216,6 +216,7 @@ run_scm_error <- function(p) {
 make_hyperpar <- function(type) {
   switch(type,
          FF16=make_FF16_hyperpar,
+         ES20=make_FF16_hyperpar,
          FF16r=make_FF16_hyperpar,
          stop("Unknown type ", type))
 }
@@ -226,6 +227,7 @@ make_hyperpar <- function(type) {
 hyperpar <- function(type) {
   switch(type,
          FF16=FF16_hyperpar,
+         ES20=FF16_hyperpar,
          FF16r=FF16_hyperpar,
          stop("Unknown type ", type))
 }

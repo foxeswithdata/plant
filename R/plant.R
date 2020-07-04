@@ -239,3 +239,13 @@ lcp_whole_plant <- function(p, ...) {
 lcp_whole_plant.Plant <- function(p, ...) {
   lcp_whole_plant(plant_to_plant_plus(p, NULL))
 }
+# The following two functions were added by the scaffolder in
+# /scripts/strategy_scaffolder/new_strategy.R
+##' @export
+`plant_to_plant_plus.Plant<ES20>` <- function(x, ...) {
+  ES20_plant_to_plant_plus(x, ...)
+}
+##' @export
+`lcp_whole_plant.PlantPlus<ES20>` <- function(p, ...) {
+  ES20_lcp_whole_plant(p, ...)
+}

@@ -1,6 +1,7 @@
 #include <plant/plant_plus.h>
 #include <plant/ff16_strategy.h>
 #include <plant/ff16r_strategy.h>
+#include <plant/es20_strategy.h>
 #include <plant/plant_tools.h>
 
 // TODO: These will disappear once the templated functions are
@@ -24,3 +25,12 @@ FF16r_plant_to_plant_plus(plant::Plant<plant::FF16r_Strategy> p,
                           SEXP environment) {
   return plant::plant_to_plant_plus(p, environment);
 }
+
+// Template found in inst/scripts/new_strategy_scaffolder.R. function: update_plant_plus()
+// [[Rcpp::export]]
+plant::PlantPlus<plant::ES20_Strategy>
+ES20_plant_to_plant_plus(plant::Plant<plant::ES20_Strategy> p,
+                          SEXP environment) {
+  return plant::plant_to_plant_plus(p, environment);
+}
+

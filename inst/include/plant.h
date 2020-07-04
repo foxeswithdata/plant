@@ -24,6 +24,7 @@
 
 // new physiology
 #include <plant/ff16r_strategy.h>
+#include <plant/es20_strategy.h>
 
 // Getting more serious down here.
 #include <plant/plant.h>

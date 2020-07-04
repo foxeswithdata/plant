@@ -59,3 +59,16 @@ double FF16_lcp_whole_plant(plant::PlantPlus<plant::FF16_Strategy> p) {
 double FF16r_lcp_whole_plant(plant::PlantPlus<plant::FF16r_Strategy> p) {
   return plant::tools::lcp_whole_plant(p);
 }
+
+// Templates found in inst/scripts/new_strategy_scaffolder.R. function: update_plant_tools()
+// [[Rcpp::export]]
+double ES20_lcp_whole_plant(plant::PlantPlus<plant::ES20_Strategy> p) {
+  return plant::tools::lcp_whole_plant(p);
+}
+// [[Rcpp::export]]
+plant::PlantPlus_internals
+ES20_oderunner_plant_internals(
+  const plant::ode::Runner<plant::tools::PlantRunner<plant::ES20_Strategy>>& obj) {
+  return obj.obj.plant.r_internals();
+}
+

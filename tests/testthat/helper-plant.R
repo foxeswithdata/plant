@@ -1,11 +1,13 @@
 
 get_list_of_strategy_types <- function() {
   list(FF16=FF16_Strategy,
+       ES20=ES20_Strategy,
        FF16r=FF16r_Strategy)
 }
 
 get_list_of_hyperpar_functions <- function() {
   list(FF16=FF16_hyperpar,
+       ES20=ES20_hyperpar,
        FF16r=FF16r_hyperpar)
 }
 
