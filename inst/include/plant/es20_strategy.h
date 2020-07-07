@@ -68,7 +68,7 @@ public:
   double compute_assimilation_p(double p, double height,
                                 const Environment& environment) const;
   // [Appendix S6] Per-leaf photosynthetic rate.
-  double assimilation_leaf(double x) const;
+  double assimilation_leaf(double time, double x) const;
 
 
 

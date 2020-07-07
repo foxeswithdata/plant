@@ -204,7 +204,7 @@ double ES20_Strategy::assimilation(const Environment& environment,
   const bool over_distribution = control.plant_assimilation_over_distribution;
   const double x_min = 0.0, x_max = over_distribution ? 1.0 : height;
 
-  double A = 0.0;
+  double A = 10.0;
 
   std::function<double(double)> f;
   if (over_distribution) {
@@ -241,18 +241,25 @@ double ES20_Strategy::compute_assimilation_x(double x, double height,
 
 double ES20_Strategy::compute_assimilation_h(double z, double height,
                                      const Environment& environment) const {
-  return assimilation_leaf(environment.canopy_openness(z)) * q(z, height);
+  return assimilation_leaf(environment.time,
+                           environment.canopy_openness(z)) * q(z, height);
 }
 
 double ES20_Strategy::compute_assimilation_p(double p, double height,
                                      const Environment& environment) const {
-  return assimilation_leaf(environment.canopy_openness(Qp(p, height)));
+  return assimilation_leaf(environment.time,
+                           environment.canopy_openness(Qp(p, height)));
 }
 
 // [Appendix S6] Per-leaf photosynthetic rate.
 // Here, `x` is openness, ranging from 0 to 1.
-double ES20_Strategy::assimilation_leaf(double x) const {
-  return a_p1 * x / (x + a_p2);
+double ES20_Strategy::assimilation_leaf(double time, double x) const {
+  
+  double adj = 1; //0.5*(1 + sin(time));
+
+  //  std::cout << "time " << time << " " << adj;
+
+  return adj * a_p1 * x / (x + a_p2);
 }
 
 // [eqn 13] Total maintenance respiration

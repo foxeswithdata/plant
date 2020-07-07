@@ -11,6 +11,8 @@ Environment::Environment(double disturbance_mean_interval,
     seed_rain(seed_rain_),
     seed_rain_index(0),
     light_environment_generator(make_interpolator(control)) {
+
+    test = 0.8;
 }
 
 double Environment::canopy_openness(double height) const {

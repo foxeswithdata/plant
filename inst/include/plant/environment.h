@@ -15,6 +15,8 @@ public:
   Environment(double disturbance_mean_interval,
               std::vector<double> seed_rain_,
               Control control);
+
+  double test;
   double canopy_openness(double height) const;
   template <typename Function>
   void compute_light_environment(Function f_canopy_openness, double height_max);
