@@ -2,6 +2,8 @@
 #ifndef PLANT_PLANT_ENVIRONMENT_H_
 #define PLANT_PLANT_ENVIRONMENT_H_
 
+#include <random>
+
 #include <plant/control.h>
 #include <plant/disturbance.h>
 #include <plant/interpolator.h>
@@ -26,6 +28,9 @@ public:
   double patch_survival_conditional(double time_at_birth) const;
   void clear();
   void clear_light_environment();
+  
+  double time_in_year() const;
+  bool stressed() const;
 
   // NOTE: Interface here will change
   double seed_rain_dt() const;
@@ -37,11 +42,19 @@ public:
   double time;
   Disturbance disturbance_regime;
   interpolator::Interpolator light_environment;
+  
+  // stress information
+  
+  double stress_mean;
+  double stress_sd;
+  
+  std::vector<double> stress_regime;
 
 private:
   std::vector<double> seed_rain;
   size_t seed_rain_index;
   interpolator::AdaptiveInterpolator light_environment_generator;
+  void prepare_stress();
 };
 
 template <typename Function>

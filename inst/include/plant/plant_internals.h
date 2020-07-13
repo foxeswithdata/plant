@@ -23,10 +23,30 @@ struct Plant_internals {
     area_heartwood(0.0),
     area_heartwood_dt(NA_REAL),
     mass_heartwood(0.0),
-    mass_heartwood_dt(NA_REAL) {
+    mass_heartwood_dt(NA_REAL),
+    area_leaf(NA_REAL),
+    area_leaf_dt(0.0)
+    mass_leaf(NA_REAL),
+    mass_leaf_dt(0.0),
+    area_sapwood(NA_REAL),
+    area_sapwood_dt(0.0)
+    mass_sapwood(NA_REAL),
+    mass_sapwood_dt(0.0),
+    area_bark(NA_REAL),
+    area_bark_dt(0.0),
+    mass_bark(NA_REAL),
+    mass_bark_dt(0.0),
+    mass_root(NA_REAL),
+    mass_root_dt(0.0),
+    mass_store(NA_REAL),
+    mass_store_dt(0.0),
+    area_stem(NA_REAL),
+    area_stem_dt(0.0)
+    {
   }
   double height;
   double area_leaf;
+  double area_leaf_dt;
   double height_dt;
   double mortality;
   double mortality_dt;
@@ -36,6 +56,21 @@ struct Plant_internals {
   double area_heartwood_dt;
   double mass_heartwood;
   double mass_heartwood_dt;
+  double area_sapwood;
+  double area_sapwood_dt;
+  double mass_sapwood;
+  double mass_sapwood_dt;
+  double area_bark;
+  double area_bark_dt;
+  double mass_bark;
+  double mass_bark_dt;  
+  double mass_root;
+  double mass_root_dt;  
+  double mass_store;
+  double mass_store_dt;  
+  double area_stem;
+  double area_stem_dt;
+  
 };
 
 }

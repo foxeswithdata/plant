@@ -14,6 +14,7 @@ PlantPlus_internals::PlantPlus_internals()
   // * Size
   mass_leaf(NA_REAL),
   area_leaf(NA_REAL),
+  mass_store(NA_REAL),
   height(NA_REAL),
   area_sapwood(NA_REAL),
   mass_sapwood(NA_REAL),
@@ -57,7 +58,9 @@ PlantPlus_internals::PlantPlus_internals()
   mass_live_dt(NA_REAL),
   mass_total_dt(NA_REAL),
   mass_above_ground_dt(NA_REAL),
-  ddiameter_stem_darea_stem(NA_REAL) {
+  ddiameter_stem_darea_stem(NA_REAL),
+  mass_store_dt(NA_REAL),
+  dbiomass_dt(NA_REAL){
 }
 
 }

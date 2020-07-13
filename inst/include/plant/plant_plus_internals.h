@@ -22,6 +22,7 @@ public:
   double area_stem;
   double mass_root;      // [eqn 7] (fine roots)
   double mass_live;      // [eqn 8]
+  double mass_store;
   double mass_total;
   double mass_above_ground;
   double diameter_stem;
@@ -59,6 +60,9 @@ public:
   double mass_total_dt;
   double mass_above_ground_dt;
   double ddiameter_stem_darea_stem;
+  
+  double mass_store_dt;
+  double dbiomass_dt;
 };
 
 }
