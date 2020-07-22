@@ -189,7 +189,10 @@ void FF16_Strategy::compute_rates(const FF16_Environment& environment,
   double area_leaf_ = vars.aux(aux_index.at("competition_effect"));
 
   const double net_mass_production_dt_ =
-    net_mass_production_dt(environment, height, area_leaf_, reuse_intervals);
+    net_mass_production_dt(environment, height, area_leaf_, mass_leaf(area_leaf_), 
+                           mass_sapwood(area_sapwood(area_leaf_), height),
+                           mass_bark(area_bark(area_leaf_), height),
+                           mass_root(area_leaf_), reuse_intervals);
 
   // store the aux sate
   vars.set_aux(aux_index.at("net_mass_production_dt"), net_mass_production_dt_);
@@ -288,14 +291,15 @@ double FF16_Strategy::net_mass_production_dt_A(double assimilation, double respi
 // One shot calculation of net_mass_production_dt
 // Used by establishment_probability() and compute_rates().
 double FF16_Strategy::net_mass_production_dt(const FF16_Environment& environment,
-                                double height, double area_leaf_,
+                                double height, double area_leaf_, double mass_leaf_, double mass_sapwood_,
+                                double mass_bark_, double mass_root_,
                                 bool reuse_intervals) {
-  const double mass_leaf_    = mass_leaf(area_leaf_);
-  const double area_sapwood_ = area_sapwood(area_leaf_);
-  const double mass_sapwood_ = mass_sapwood(area_sapwood_, height);
-  const double area_bark_    = area_bark(area_leaf_);
-  const double mass_bark_    = mass_bark(area_bark_, height);
-  const double mass_root_    = mass_root(area_leaf_);
+  // const double mass_leaf_    = mass_leaf(area_leaf_);
+  // const double area_sapwood_ = area_sapwood(area_leaf_);
+  // const double mass_sapwood_ = mass_sapwood(area_sapwood_, height);
+  // const double area_bark_    = area_bark(area_leaf_);
+  // const double mass_bark_    = mass_bark(area_bark_, height);
+  // const double mass_root_    = mass_root(area_leaf_);
   const double assimilation_ = assimilator.assimilate(control, environment, height,
                                             area_leaf_, reuse_intervals);
   const double respiration_ =
@@ -470,7 +474,10 @@ double FF16_Strategy::mortality_growth_dependent_dt(double productivity_area) co
 // [eqn 20] Survival of seedlings during establishment
 double FF16_Strategy::establishment_probability(const FF16_Environment& environment) {
   const double net_mass_production_dt_ =
-    net_mass_production_dt(environment, height_0, area_leaf_0);
+    net_mass_production_dt(environment, height_0, area_leaf_0, mass_leaf(area_leaf_0), 
+                           mass_sapwood(area_sapwood(area_leaf_0), height_0),
+                           mass_bark(area_bark(area_leaf_0), height_0),
+                           mass_root(area_leaf_0));
   if (net_mass_production_dt_ > 0) {
     const double tmp = a_d0 * area_leaf_0 / net_mass_production_dt_;
     return 1.0 / (tmp * tmp + 1.0);

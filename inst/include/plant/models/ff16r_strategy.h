@@ -125,7 +125,9 @@ public:
   double net_mass_production_dt_A(double assimilation, double respiration,
                                   double turnover) const;
   double net_mass_production_dt(const FF16r_Environment& environment,
-                                double height, double area_leaf_,
+                                double height, double area_leaf_, 
+                                double mass_leaf_, double mass_sapwood_,
+                                double mass_bark_, double mass_root_,
                                 bool reuse_intervals=false);
 
   // [eqn 16] Fraction of whole plan growth that is leaf
@@ -248,6 +250,8 @@ public:
 
   Assimilation<FF16r_Environment> assimilator;
 
+  // make polymorphic
+  virtual ~FF16r_Strategy() {}
   
 };
 

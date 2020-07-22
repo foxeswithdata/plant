@@ -46,7 +46,9 @@ public:
   void update_dependent_aux(const int index, Internals& vars);
 
   double net_mass_production_dt(const environment_type& environment,
-                                double size, double competition_effect_,
+                                double size, double area_leaf, double mass_leaf, double mass_sapwood,
+                                double mass_bark, double mass_root, 
+                                double competition_effect_,
                                 bool reuse_intervals=false);
 
   double establishment_probability(const environment_type& environment);
@@ -59,6 +61,9 @@ public:
   double compute_competition(double z, double size) const;
 
   double initial_size(void) const;
+  
+  // make polymorphic
+  virtual ~Strategy() {}
 
   double size_0;
 

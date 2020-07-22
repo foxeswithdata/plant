@@ -27,6 +27,9 @@
 #include <plant/models/ff16r_strategy.h>
 // #include <plant/models/water_strategy.h>
 
+#include <plant/models/es20_strategy.h>
+#include <plant/models/es20r_strategy.h>
+
 // Getting more serious down here.
 #include <plant/plant.h>
 #include <plant/internals.h>

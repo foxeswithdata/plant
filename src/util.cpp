@@ -4,6 +4,8 @@
 namespace plant {
 namespace util {
 
+
+
 size_t index::check_bounds(size_t size) {
   // We don't check size < 0 or x < 0, as not possible with size_t
   if (size == 0) {
@@ -52,6 +54,10 @@ std::vector<double> seq_len(double from, double to, size_t len) {
   ret.back() = to; // Protect against rounding errors.
   return ret;
 }
+
+
+
+
 
 void stop(const std::string& msg) {
   Rcpp::stop(msg);

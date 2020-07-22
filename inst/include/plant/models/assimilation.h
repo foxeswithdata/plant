@@ -34,10 +34,20 @@ class Assimilation {
                     double area_leaf,
                     bool reuse_intervals
                     ) {
+    
+   
+    
+    
     const bool over_distribution = control.plant_assimilation_over_distribution;
     const double x_min = 0.0, x_max = over_distribution ? 1.0 : height;
 
     double A = 0.0;
+    
+    // Add the stress
+    
+    // if((E& dynamic_cast<ES20_Environment&> (environment)) != NULL && environment.stressed()){
+    //   return 0;
+    // }
 
     std::function<double(double)> f;
     if (over_distribution) {

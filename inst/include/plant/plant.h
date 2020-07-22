@@ -6,7 +6,15 @@
 #include <plant/ode_interface.h>
 #include <vector>
 #include <plant/internals.h>
+#include <plant/util.h>
 #include <plant/uniroot.h>
+
+#include <plant/models/ff16_strategy.h>
+#include <plant/models/ff16r_strategy.h>
+#include <plant/models/es20_strategy.h>
+#include <plant/models/es20r_strategy.h>
+
+#include <iostream>
 
 
 namespace plant {
@@ -69,7 +77,38 @@ public:
 
   double net_mass_production_dt(const environment_type &environment) {
     // TODO:  maybe reuse intervals? default false 
-    return strategy->net_mass_production_dt(environment, state(HEIGHT_INDEX), aux("competition_effect"));
+    // should fix with a switch 
+
+      if(strategy_name() == "ES20"){
+        return strategy->net_mass_production_dt(environment, state(HEIGHT_INDEX), 
+                                                     state(AREA_LEAF_INDEX), state(MASS_LEAF_INDEX),
+                                                     state(MASS_SAPWOOD_INDEX), state(MASS_BARK_INDEX),
+                                                     state(MASS_ROOT_INDEX), aux("competition_effect"));
+      }
+      else if(strategy_name() == "ESr20"){
+        return strategy->net_mass_production_dt(environment, state(HEIGHT_INDEX), 
+                                                state(AREA_LEAF_INDEX), state(MASS_LEAF_INDEX),
+                                                state(MASS_SAPWOOD_INDEX), state(MASS_BARK_INDEX),
+                                                state(MASS_ROOT_INDEX), aux("competition_effect"));
+      }
+      else if(strategy_name() == "FF16"){
+        return strategy->net_mass_production_dt(environment, state(HEIGHT_INDEX), 
+                                                state(AREA_LEAF_INDEX), strategy->mass_leaf(state(AREA_LEAF_INDEX)),
+                                                strategy->mass_sapwood(strategy->area_sapwood(state(AREA_LEAF_INDEX)), state(HEIGHT_INDEX)), 
+                                                strategy->mass_bark(strategy->area_bark(state(AREA_LEAF_INDEX)), state(HEIGHT_INDEX)),
+                                                strategy->mass_root(state(AREA_LEAF_INDEX)),aux("competition_effect"));
+      }
+      else if(strategy_name() == "FF16r"){
+        return strategy->net_mass_production_dt(environment, state(HEIGHT_INDEX), 
+                                                state(AREA_LEAF_INDEX), strategy->mass_leaf(state(AREA_LEAF_INDEX)),
+                                                strategy->mass_sapwood(strategy->area_sapwood(state(AREA_LEAF_INDEX)), state(HEIGHT_INDEX)), 
+                                                strategy->mass_bark(strategy->area_bark(state(AREA_LEAF_INDEX)), state(HEIGHT_INDEX)),
+                                                strategy->mass_root(state(AREA_LEAF_INDEX)),aux("competition_effect"));
+      }
+      else{
+        return 0;
+      }
+   
   }
 
   // * ODE interface
@@ -144,6 +183,12 @@ public:
   // ! height or something
   Internals r_internals() const { return vars; }
   const Control &control() const { return strategy->control; }
+  
+  // convert string to integer for use in switch statements (source: https://stackoverflow.com/questions/16388510/evaluate-a-string-with-a-switch-in-c)
+  // move this to UTIL to make generally available
+  constexpr unsigned int str2int(const char* str, int h = 0) const {
+    return !str[h] ? 5381 : (str2int(str, h+1) * 33) ^ str[h];
+  }
 
 private:
   strategy_type_ptr strategy;
@@ -153,6 +198,8 @@ private:
 template <typename T, typename E> Plant<T,E> make_plant(T s) {
   return Plant<T,E>(make_strategy_ptr(s));
 }
+
+
 
 } // namespace plant
 

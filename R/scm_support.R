@@ -218,6 +218,8 @@ make_hyperpar <- function(type) {
   switch(type,
          FF16r=make_FF16_hyperpar,
          FF16=make_FF16_hyperpar,
+         ES20=make_ES20_hyperpar,
+         ES20r=make_ES20_hyperpar,
          stop("Unknown type ", type))
 }
 
@@ -228,6 +230,8 @@ hyperpar <- function(type) {
   switch(type,
          FF16r=FF16_hyperpar,
          FF16=FF16_hyperpar,
+         ES20=ES20_hyperpar,
+         ES20r=ES20_hyperpar,
          stop("Unknown type ", type))
 }
 
@@ -362,5 +366,7 @@ make_environment<- function(type, ...) {
   switch(type,
     FF16=FF16_make_environment(...),
     FF16r=FF16r_make_environment(...),
+    ES20=ES20_make_environment(...),
+    ES20r=ES20_make_environment(...),
     stop("Unknown type ", type))
 }
