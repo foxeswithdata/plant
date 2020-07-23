@@ -23,7 +23,6 @@ public:
     using std::cout;
     using std::cerr;
     using std::endl;
-    cout << "ES20 environment constructor 0 first" << endl;
     
     //TODO: make this appear in the Control   
     time = 0.0;
@@ -31,11 +30,8 @@ public:
     seed_rain = { 1.0, 1.0, 1.0 };
     seed_rain_index = 3;
     k_I = 0.5;
-    stress_mean = 0.684931506849315;
-    stress_sd = 0.0684931506849315;
     
-
-    cout << "ES20 environment constructor 0.5 " << endl;
+  
     
     //TODO: make this appear in the Control   
     
@@ -46,16 +42,11 @@ public:
         return get_environment_at_height(height);
       }, 0, 1); // these are update with init(x, y) whne patch is created
     
-    
-    cout << "ES20 environment constructor 1 " << endl;
-    
     //TODO: make this appear in the Control    
     stress_mean = 0.684931506849315;
     stress_sd = 0.0684931506849315;
     
-    // prepare_stress();
-    
-    cout << "ES20 environment constructor 2 " << endl;
+    prepare_stress();
   };
   
   ES20_Environment(double disturbance_mean_interval,
@@ -66,33 +57,31 @@ public:
     using std::cout;
     using std::cerr;
     using std::endl;
-    cout << "ES20 environment constructor 0 second" << endl;
     
-    //TODO: make this appear in the Control   
     
     k_I = k_I_;
     environment_generator = interpolator::AdaptiveInterpolator(control.environment_light_tol,
                                                                control.environment_light_tol,
                                                                control.environment_light_nbase,
                                                                control.environment_light_max_depth);
-    cout << "ES20 environment constructor 0.5 " << endl;
-    
-    //TODO: make this appear in the Control   
     
     time = 0.0;
     disturbance_regime = disturbance_mean_interval;
     seed_rain = seed_rain_;
     seed_rain_index = 0;
     
-    cout << "ES20 environment constructor 1 " << endl;
+    stress_mean = control.stress_mean;
+    stress_sd = control.stress_sd;
     
-  //TODO: make this appear in the Control    
-    stress_mean = 0.684931506849315;
-    stress_sd = 0.0684931506849315;
+    if(control.generate_stress || control.stress_regime.empty()){
+      cout << "ES20 environment constructor prepare stress " << endl;
+      prepare_stress();
+    }
+    else{
+      stress_regime = control.stress_regime;
+      cout << "ES20 environment constructor stress regime there " << endl;
+    }
     
-    // prepare_stress();
-    
-    cout << "ES20 environment constructor 2 " << endl;
   };
   
   template <typename Function>
@@ -155,6 +144,16 @@ public:
     for (int i = 0; i < 3000; i++) {
       stress_regime.push_back(d(stress_regime_engine));
     }
+  }
+  
+  void reset_stress_random(double new_mean=0.684931506849315, double new_sd=0.0684931506849315){
+    stress_mean = new_mean;
+    stress_sd = new_sd;
+    prepare_stress();
+  }
+  
+  void reset_stress(std::vector<double> new_stress_regime){
+    stress_regime = new_stress_regime;
   }
   
   double k_I;

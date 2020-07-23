@@ -20,20 +20,3 @@ plant::Internals ES20_oderunner_plant_internals(
   return obj.obj.plant.r_internals();
 }
 
-// [[Rcpp::export]]
-plant::Internals ES20r_oderunner_plant_internals(
-    const plant::ode::Runner<plant::tools::PlantRunner<plant::ES20r_Strategy, plant::ES20r_Environment>>& obj) {
-  return obj.obj.plant.r_internals();
-}
-
-
-
-
-
-// [[Rcpp::export]]
-plant::Internals ST_00_oderunner_plant_internals(
-  const plant::ode::Runner<plant::tools::PlantRunner<plant::ST_00_Strategy, plant::ST_00_Environment>>& obj) {
-  return obj.obj.plant.r_internals();
-}
-
-

@@ -24,12 +24,10 @@
 
 // Specific models
 #include <plant/models/ff16_strategy.h>
-#include <plant/models/st_00_strategy.h>
 #include <plant/models/ff16r_strategy.h>
 // #include <plant/models/water_strategy.h>
 
 #include <plant/models/es20_strategy.h>
-#include <plant/models/es20r_strategy.h>
 
 // Getting more serious down here.
 #include <plant/plant.h>
