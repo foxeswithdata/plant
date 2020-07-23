@@ -10,6 +10,9 @@
 #include <plant/cohort_schedule.h>
 #include <plant/scm_utils.h> // Unfortunately needed for setup_cohort_schedule
 
+#include <iostream>
+#include <stdio.h>
+
 // TODO: I will possibly move out the "Patch" parameters out into
 // their own simple list class at some point, to make this a bit more
 // coherent.
@@ -31,7 +34,15 @@ struct Parameters {
       disturbance_mean_interval(30),
       cohort_schedule_max_time(NA_REAL),
       hyperpar(hyperpar) {
+    printf ("Parameter constructor printf  \n");
+    
+    using std::cout;
+    using std::cerr;
+    using std::endl;
+    cout << "Parameters constructor" << endl;
+    
         validate();
+        
   }
 
   // Data -- public for now (see github issue #17).
@@ -91,6 +102,12 @@ size_t Parameters<T,E>::n_mutants() const {
 // a penalty.  So don't put anything too stupidly heavy in here.
 template <typename T, typename E>
 void Parameters<T,E>::validate() {
+  using std::cout;
+  using std::cerr;
+  using std::endl;
+  cout << "parameters validator " << endl;
+  
+  //TODO: make this appear in the Control   
   const size_t n_spp = size();
 
   // Set some defaults and check lengths.  Number of strategies is

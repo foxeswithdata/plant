@@ -1,94 +1,94 @@
-# Built from  R/ff16.R on Wed Jul 22 19:16:48 2020 using the scaffolder, from the strategy:  FF16
+# Built from  R/ff16.R on Wed Jul 22 20:33:17 2020 using the scaffolder, from the strategy:  FF16
 ## We can probably actually do better than this with an S3 method on
 ## the actual strategy?  That would need to be organised by the
 ## templating though and that's stretched to the limit.
 
-##' Create a ES20 Plant or Cohort
-##' @title Create a ES20 Plant or Cohort
-##' @param s A \code{\link{ES20_Strategy}} object
+##' Create a ST_00 Plant or Cohort
+##' @title Create a ST_00 Plant or Cohort
+##' @param s A \code{\link{ST_00_Strategy}} object
 ##' @export
-##' @rdname ES20
+##' @rdname ST_00
 ##' @examples
-##' pl <- ES20_Plant()
+##' pl <- ST_00_Plant()
 ##' pl$height
-ES20_Plant <- function(s=ES20_Strategy()) {
-  Plant("ES20", "ES20_Env")(s)
+ST_00_Plant <- function(s=ST_00_Strategy()) {
+  Plant("ST_00", "ST_00_Env")(s)
 }
 
 #' Compute the whole plant light compensation point for a single
-#' plant with ES20 strategy. Called via general function in plant.R
+#' plant with ST_00 strategy. Called via general function in plant.R
 ##' @export
-##' @rdname ES20
-`lcp_whole_plant.Plant<ES20>` <- function(p, ...) {
-  ES20_lcp_whole_plant(p, ...)
+##' @rdname ST_00
+`lcp_whole_plant.Plant<ST_00>` <- function(p, ...) {
+  ST_00_lcp_whole_plant(p, ...)
 }
 
 ##' @export
-##' @rdname ES20
-ES20_Cohort <- function(s=ES20_Strategy()) {
-  Cohort("ES20", "ES20_Env")(s)
+##' @rdname ST_00
+ST_00_Cohort <- function(s=ST_00_Strategy()) {
+  Cohort("ST_00", "ST_00_Env")(s)
 }
 
 ##' @export
-##' @rdname ES20
-ES20_Species <- function(s=ES20_Strategy()) {
-  Species("ES20", "ES20_Env")(s)
+##' @rdname ST_00
+ST_00_Species <- function(s=ST_00_Strategy()) {
+  Species("ST_00", "ST_00_Env")(s)
 }
 
 ##' @export
-##' @rdname ES20
+##' @rdname ST_00
 ##' @param ... Arguments!
-ES20_Parameters <- function() {
-  Parameters("ES20","ES20_Env")(hyperpar=ES20_hyperpar)
+ST_00_Parameters <- function() {
+  Parameters("ST_00","ST_00_Env")(hyperpar=ST_00_hyperpar)
 }
 
 ##' @export
-##' @rdname ES20
-##' @param p A \code{Parameters<ES20,ES20_Env>} object
-ES20_Patch <- function(p) {
-  Patch("ES20", "ES20_Env")(p)
+##' @rdname ST_00
+##' @param p A \code{Parameters<ST_00,ST_00_Env>} object
+ST_00_Patch <- function(p) {
+  Patch("ST_00", "ST_00_Env")(p)
 }
 
 ##' @export
-##' @rdname ES20
-ES20_SCM <- function(p) {
-  SCM("ES20", "ES20_Env")(p)
+##' @rdname ST_00
+ST_00_SCM <- function(p) {
+  SCM("ST_00", "ST_00_Env")(p)
 }
 
 ##' @export
-##' @rdname ES20
-ES20_StochasticSpecies <- function(s=ES20_Strategy()) {
-  StochasticSpecies("ES20", "ES20_Env")(s)
+##' @rdname ST_00
+ST_00_StochasticSpecies <- function(s=ST_00_Strategy()) {
+  StochasticSpecies("ST_00", "ST_00_Env")(s)
 }
 
 ##' @export
-##' @rdname ES20
-ES20_StochasticPatch <- function(p) {
-  StochasticPatch("ES20", "ES20_Env")(p)
+##' @rdname ST_00
+ST_00_StochasticPatch <- function(p) {
+  StochasticPatch("ST_00", "ST_00_Env")(p)
 }
 
 ##' @export
-##' @rdname ES20
-ES20_StochasticPatchRunner <- function(p) {
-  StochasticPatchRunner("ES20", "ES20_Env")(p)
+##' @rdname ST_00
+ST_00_StochasticPatchRunner <- function(p) {
+  StochasticPatchRunner("ST_00", "ST_00_Env")(p)
 }
 
 # ##' @export
-# ##' @rdname ES20
-# ES20_PlantPlus <- function(s=ES20_Strategy()) {
-#   PlantPlus("ES20")(s)
+# ##' @rdname ST_00
+# ST_00_PlantPlus <- function(s=ST_00_Strategy()) {
+#   PlantPlus("ST_00")(s)
 # }
 
 ## Helper:
 ##' @export
-##' @rdname ES20_Environment
+##' @rdname ST_00_Environment
 ##' @param p A Parameters object
-ES20_make_environment <- function(p) {
-  ES20_Environment(p$disturbance_mean_interval, p$seed_rain, p$k_I, p$control)
+ST_00_make_environment <- function(p) {
+  ST_00_Environment(p$disturbance_mean_interval, p$seed_rain, p$k_I, p$control)
 }
 
-##' Hyperparameters for ES20 physiological model
-##' @title Hyperparameters for ES20 physiological model
+##' Hyperparameters for ST_00 physiological model
+##' @title Hyperparameters for ST_00 physiological model
 ##' @param lma_0 Central (mean) value for leaf mass per area [kg /m2]
 ##' @param B_kl1 Rate of leaf turnover at lma_0 [/yr]
 ##' @param B_kl2 Scaling slope for phi in leaf turnover [dimensionless]
@@ -111,8 +111,8 @@ ES20_make_environment <- function(p) {
 ##' @param latitude degrees from equator (0-90), used in solar model [deg]
 ##' @importFrom stats coef nls
 ##' @export
-##' @rdname ES20_hyperpar
-make_ES20_hyperpar <- function(
+##' @rdname ST_00_hyperpar
+make_ST_00_hyperpar <- function(
                                 lma_0=0.1978791,
                                 B_kl1=0.4565855,
                                 B_kl2=1.71,
@@ -285,11 +285,11 @@ make_ES20_hyperpar <- function(
   }
 }
 
-##' Hyperparameter function for ES20 physiological model
-##' @title Hyperparameter function for ES20 physiological model
+##' Hyperparameter function for ST_00 physiological model
+##' @title Hyperparameter function for ST_00 physiological model
 ##' @param m A matrix of trait values, as returned by \code{trait_matrix}
 ##' @param s A strategy object
 ##' @param filter A flag indicating whether to filter columns. If TRUE, any numbers 
 ##' that are within eps of the default strategy are not replaced.
 ##' @export
-ES20_hyperpar <- make_ES20_hyperpar()
+ST_00_hyperpar <- make_ST_00_hyperpar()

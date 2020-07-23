@@ -1,8 +1,7 @@
+// Built from  inst/include/plant/models/ff16_environment.h on Wed Jul 22 20:33:17 2020 using the scaffolder, from the strategy:  FF16
 // -*-c++-*-
-#ifndef PLANT_PLANT_ES20_ENVIRONMENT_H_
-#define PLANT_PLANT_ES20_ENVIRONMENT_H_
-
-#include <random>
+#ifndef PLANT_PLANT_ST_00_ENVIRONMENT_H_
+#define PLANT_PLANT_ST_00_ENVIRONMENT_H_
 
 #include <plant/control.h>
 #include <plant/disturbance.h>
@@ -12,20 +11,26 @@
 #include <plant/util.h>
 #include <Rcpp.h>
 
+#include <iostream>
+#include <random>
+
 using namespace Rcpp;
 
 namespace plant {
 
-class ES20_Environment : public Environment {
+class ST_00_Environment : public Environment {
 public:
-  
-  ES20_Environment() {
+
+  ST_00_Environment() {
     using std::cout;
     using std::cerr;
     using std::endl;
-    cout << "ES20 environment constructor 0 first" << endl;
-    
-    //TODO: make this appear in the Control   
+    using std::flush;
+    cout << "ST00 environment constructor 1 first" << endl;
+    cout << "ST00 environment stress added again \n" <<flush;
+    cout << "ST00 environment now I'm adding stress prep \n" <<flush;
+    cout << "ST00 environment now I'm adding stress prep and fixing the vector \n" <<flush;
+    cout << "ST00 environment now I'm adding stress prep and fixing the vector with randomness\n" <<flush;
     time = 0.0;
     disturbance_regime = 30;
     seed_rain = { 1.0, 1.0, 1.0 };
@@ -34,100 +39,76 @@ public:
     stress_mean = 0.684931506849315;
     stress_sd = 0.0684931506849315;
     
-
-    cout << "ES20 environment constructor 0.5 " << endl;
-    
-    //TODO: make this appear in the Control   
-    
     environment_generator = interpolator::AdaptiveInterpolator(1e-6, 1e-6, 17, 16);
     // Define an anonymous function to pass got the environment generator
     environment_interpolator = environment_generator.construct(
       [&](double height) {
-        return get_environment_at_height(height);
+          return get_environment_at_height(height);
       }, 0, 1); // these are update with init(x, y) whne patch is created
     
-    
-    cout << "ES20 environment constructor 1 " << endl;
-    
-    //TODO: make this appear in the Control    
-    stress_mean = 0.684931506849315;
-    stress_sd = 0.0684931506849315;
-    
-    // prepare_stress();
-    
-    cout << "ES20 environment constructor 2 " << endl;
+    prepare_stress();
   };
-  
-  ES20_Environment(double disturbance_mean_interval,
+
+  ST_00_Environment(double disturbance_mean_interval,
                    std::vector<double> seed_rain_,
                    double k_I_,
                    Control control) {
-    
     using std::cout;
     using std::cerr;
     using std::endl;
-    cout << "ES20 environment constructor 0 second" << endl;
+    using std::flush;
+    cout << "ST00 environment constructor 1 second" << endl;
     
-    //TODO: make this appear in the Control   
+    cout << "ST00 environment stress added again " <<flush;
     
-    k_I = k_I_;
-    environment_generator = interpolator::AdaptiveInterpolator(control.environment_light_tol,
-                                                               control.environment_light_tol,
-                                                               control.environment_light_nbase,
-                                                               control.environment_light_max_depth);
-    cout << "ES20 environment constructor 0.5 " << endl;
-    
-    //TODO: make this appear in the Control   
-    
-    time = 0.0;
-    disturbance_regime = disturbance_mean_interval;
-    seed_rain = seed_rain_;
-    seed_rain_index = 0;
-    
-    cout << "ES20 environment constructor 1 " << endl;
-    
-  //TODO: make this appear in the Control    
-    stress_mean = 0.684931506849315;
-    stress_sd = 0.0684931506849315;
-    
-    // prepare_stress();
-    
-    cout << "ES20 environment constructor 2 " << endl;
+      k_I = k_I_;
+      environment_generator = interpolator::AdaptiveInterpolator(control.environment_light_tol,
+                                control.environment_light_tol,
+                                control.environment_light_nbase,
+                                control.environment_light_max_depth);
+      time = 0.0;
+      disturbance_regime = disturbance_mean_interval;
+      seed_rain = seed_rain_;
+      seed_rain_index = 0;
+      stress_mean = 0.684931506849315;
+      stress_sd = 0.0684931506849315;
+      
   };
-  
+
+  // TODO: move these to Environment 
   template <typename Function>
   void compute_environment(Function f_compute_competition,
                            double height_max) {
     const double lower_bound = 0.0;
     double upper_bound = height_max;
-    
+
     auto f_canopy_openness = [&] (double height) -> double {return exp(-k_I * f_compute_competition(height));};
     environment_interpolator =
       environment_generator.construct(f_canopy_openness, lower_bound, upper_bound);
   }
-  
+
   template <typename Function>
   void rescale_environment(Function f_compute_competition,
-                           double height_max) {
+                                             double height_max) {
     std::vector<double> h = environment_interpolator.get_x();
     const double min = environment_interpolator.min(), // 0.0?
       height_max_old = environment_interpolator.max();
-    
+
     auto f_canopy_openness = [&] (double height) -> double {return exp(-k_I * f_compute_competition(height));};
     util::rescale(h.begin(), h.end(), min, height_max_old, min, height_max);
     h.back() = height_max; // Avoid round-off error.
-    
+
     environment_interpolator.clear();
     for (auto hi : h) {
       environment_interpolator.add_point(hi, f_canopy_openness(hi));
     }
     environment_interpolator.initialise();
   }
-  
+
   double canopy_openness(double height) const {
     return get_environment_at_height(height);
   }
-  
+
   double time_in_year() const{
     return (time-floor(time));
   }
@@ -142,9 +123,7 @@ public:
     }
   }
   
-  void prepare_stress(){
-    //erase stress as it exists
-    stress_regime.erase(stress_regime.begin(),stress_regime.end());
+  void prepare_stress() {
     std::default_random_engine stress_regime_engine;
     
     // values near the mean are the most likely
@@ -158,7 +137,6 @@ public:
   }
   
   double k_I;
-  double time;
   
   double stress_mean;
   double stress_sd;
@@ -167,7 +145,7 @@ public:
   
 };
 
-inline Rcpp::NumericMatrix get_state(const ES20_Environment environment) {
+inline Rcpp::NumericMatrix get_state(const ST_00_Environment environment) {
   using namespace Rcpp;
   NumericMatrix xy = environment.environment_interpolator.r_get_xy();
   Rcpp::CharacterVector colnames =
