@@ -62,8 +62,7 @@ public:
 
   double initial_size(void) const;
   
-  // make polymorphic
-  virtual ~Strategy() {}
+  void initialize_states(Internals& vars);
 
   double size_0;
 

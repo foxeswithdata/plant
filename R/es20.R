@@ -38,8 +38,8 @@ ES20_Species <- function(s=ES20_Strategy()) {
 ##' @export
 ##' @rdname ES20
 ##' @param ... Arguments!
-ES20_Parameters <- function() {
-  Parameters("ES20","ES20_Env")(hyperpar=ES20_hyperpar)
+ES20_Parameters <- function(...) {
+  Parameters("ES20","ES20_Env")(hyperpar=ES20_hyperpar, ...)
 }
 
 ##' @export

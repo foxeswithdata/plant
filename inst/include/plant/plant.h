@@ -25,7 +25,7 @@ public:
       strategy->refresh_indices();
     }
     vars.resize(strategy_type::state_size(), s->aux_size()); // = Internals(strategy_type::state_size());
-    set_state("height", strategy->height_0);
+    s->initialize_states(vars);
   }
   
   // useage: state(HEIGHT_INDEX)
@@ -63,6 +63,10 @@ public:
 
   void compute_rates(const environment_type &environment,
                          bool reuse_intervals = false) {
+    using std::cout;
+    using std::cerr;
+    using std::endl;
+    printf("in compute rates, strategy is %s", strategy_name());
     strategy->compute_rates(environment, reuse_intervals, vars);
   }
   
@@ -79,12 +83,6 @@ public:
                                                      state(AREA_LEAF_INDEX), state(MASS_LEAF_INDEX),
                                                      state(MASS_SAPWOOD_INDEX), state(MASS_BARK_INDEX),
                                                      state(MASS_ROOT_INDEX), aux("competition_effect"));
-      }
-      else if(strategy_name() == "ESr20"){
-        return strategy->net_mass_production_dt(environment, state(HEIGHT_INDEX), 
-                                                state(AREA_LEAF_INDEX), state(MASS_LEAF_INDEX),
-                                                state(MASS_SAPWOOD_INDEX), state(MASS_BARK_INDEX),
-                                                state(MASS_ROOT_INDEX), aux("competition_effect"));
       }
       else if(strategy_name() == "FF16"){
         return strategy->net_mass_production_dt(environment, state(HEIGHT_INDEX), 
@@ -181,9 +179,6 @@ public:
   
   // convert string to integer for use in switch statements (source: https://stackoverflow.com/questions/16388510/evaluate-a-string-with-a-switch-in-c)
   // move this to UTIL to make generally available
-  constexpr unsigned int str2int(const char* str, int h = 0) const {
-    return !str[h] ? 5381 : (str2int(str, h+1) * 33) ^ str[h];
-  }
 
 private:
   strategy_type_ptr strategy;

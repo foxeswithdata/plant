@@ -109,6 +109,15 @@ ES20_Strategy::ES20_Strategy() {
   
   // Will get computed properly by prepare_strategy
   height_0 = NA_REAL;
+  area_leaf_0 = NA_REAL;
+  mass_leaf_0 = NA_REAL;
+  mass_sapwood_0 = NA_REAL;
+  mass_bark_0 = NA_REAL;
+  mass_root_0 = NA_REAL;
+  area_sapwood_0 = NA_REAL;
+  area_bark_0 = NA_REAL;
+  area_stem_0 = NA_REAL;
+  mass_storage_0 = NA_REAL;
   eta_c    = NA_REAL;
   
   collect_all_auxillary = false;
@@ -215,30 +224,56 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
                                   bool reuse_intervals,
                                   Internals& vars) {
   
+  using std::cout;
+  using std::flush;
+  using std::endl;
+  
+  cout << "\nES Strategy compute rates |" << flush;
+  
   double height = vars.state(HEIGHT_INDEX);
   
+  cout << "O" << flush;
+  
   double area_leaf = vars.state(AREA_LEAF_INDEX);
+  
+  cout << "O" << flush;
+  
   double area_bark = vars.state(AREA_BARK_INDEX);
+  
+  cout << "O" << flush;
   double area_heartwood = vars.state(AREA_HEARTWOOD_INDEX);
+  cout << "O" << flush;
   double area_sapwood = vars.state(AREA_SAPWOOD_INDEX);
+  cout << "O" << flush;
   
   double mass_leaf = vars.state(MASS_LEAF_INDEX);
+  cout << "O" << flush;
   double mass_bark = vars.state(MASS_BARK_INDEX);
+  cout << "O" << flush;
   double mass_sapwood = vars.state(MASS_SAPWOOD_INDEX);
+  cout << "O" << flush;
   double mass_root = vars.state(MASS_ROOT_INDEX);
+  cout << "O" << flush;
   
   double mass_storage = vars.state(MASS_STORAGE_INDEX);
+  cout << "O" << flush;
   
   const double net_mass_production_dt_ =
     net_mass_production_dt(environment, height, area_leaf, mass_leaf, mass_sapwood,
                            mass_bark, mass_root, reuse_intervals);
+  cout << "\n net mass production " << net_mass_production_dt_ << endl;
+  cout << "I" << flush;
   
   const double dbiomass_dt_ = dbiomass_dt(environment, net_mass_production_dt_);
+  cout << "I" << flush;
   const double dmass_storage_dt_  = dmass_storage_dt(net_mass_production_dt_, dbiomass_dt_);
+  cout << "I" << flush;
   
   // store the aux sate
   vars.set_aux(aux_index.at("net_mass_production_dt"), net_mass_production_dt_);
+  cout << "O" << flush;
   vars.set_aux(aux_index.at("dbiomass_dt"), dbiomass_dt_);
+  cout << "O" << flush;
   
   if (dbiomass_dt_ > 0) {
     
@@ -283,6 +318,7 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
     const double ddiameter_stem_dt_ = diameter_stem_dt(area_stem(area_heartwood, area_sapwood, area_bark), darea_stem_dt_);
     
     vars.set_rate(state_index.at("diameter_stem"), ddiameter_stem_dt_);
+    vars.set_rate(state_index.at("area_stem"), darea_stem_dt_);
     
     // changes in root
     const double dmass_root_dt_ = mass_root_dt(darea_leaf_dt_);
@@ -306,8 +342,10 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
     vars.set_rate(state_index.at("mass_bark"), - turnover_bark(mass_bark));
     vars.set_rate(state_index.at("diameter_stem"), 0.0);
     vars.set_rate(state_index.at("mass_root"), - turnover_root(mass_root));
+    vars.set_rate(state_index.at("area_stem"), - turnover_sapwood(area_bark));
   }
   // [eqn 21] - Instantaneous mortality rate
+  vars.set_rate(MASS_STORAGE_INDEX, dmass_storage_dt_);
   vars.set_rate(MORTALITY_INDEX,
                 mortality_dt(mass_storage / mass_live(mass_leaf, mass_bark, mass_sapwood, mass_root), vars.state(MORTALITY_INDEX)));
 }
@@ -546,6 +584,9 @@ double ES20_Strategy::mortality_growth_independent_dt() const {
 }
 
 double ES20_Strategy::mortality_growth_dependent_dt(double storage_portion) const {
+  if(storage_portion <= 0){
+    return 1;
+  }
   return a_dG1 * exp(-a_dG2 * storage_portion);
 }
 
@@ -625,6 +666,23 @@ void ES20_Strategy::prepare_strategy() {
   area_bark_0 = area_bark(area_leaf_0);
   mass_bark_0 = mass_bark(area_bark_0, height_0);
   mass_root_0 = mass_root(area_leaf_0);
+  area_stem_0 = area_stem(area_bark_0, area_sapwood_0, 0); 
+  mass_storage_0 = 0.1 * mass_live(mass_leaf_0, mass_bark_0, mass_sapwood_0, mass_root_0);
+  diameter_stem_0 = diameter_stem(area_stem_0);
+}
+
+void ES20_Strategy::initialize_states(Internals &vars){
+  vars.set_state(state_index.at("height"), height_0);
+  vars.set_state(state_index.at("area_leaf"), area_leaf_0);
+  vars.set_state(state_index.at("mass_leaf"), mass_leaf_0);
+  vars.set_state(state_index.at("area_sapwood"), area_sapwood_0);
+  vars.set_state(state_index.at("mass_sapwood"), mass_sapwood_0);
+  vars.set_state(state_index.at("area_bark"), area_bark_0);
+  vars.set_state(state_index.at("mass_bark"), mass_bark_0);
+  vars.set_state(state_index.at("mass_root"), mass_root_0);
+  vars.set_state(state_index.at("area_stem"), area_stem_0);
+  vars.set_state(state_index.at("mass_storage"), mass_storage_0);
+  vars.set_state(state_index.at("diameter_stem"), diameter_stem_0);
 }
 
 ES20_Strategy::ptr make_strategy_ptr(ES20_Strategy s) {

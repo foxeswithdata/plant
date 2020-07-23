@@ -52,7 +52,7 @@ public:
   std::vector<std::string> aux_names() {
     std::vector<std::string> ret({
       "competition_effect",
-      "net_mass_production_dt"
+      "net_mass_production_dt",
       "dbiomass_dt"
     });
     return ret;
@@ -210,6 +210,9 @@ public:
   // Set constants within ES20_Strategy
   void prepare_strategy();
   
+  // Initialize all relevant states
+  void initialize_states(Internals& vars);
+  
   // Previously there was an "integrator" here.  I'm going to stick
   // that into Control or ES20_Environment instead.
   
@@ -271,6 +274,9 @@ public:
   double mass_root_0;
   double area_sapwood_0;
   double area_bark_0;
+  double area_stem_0;
+  double mass_storage_0;
+  double diameter_stem_0;
   
   std::string name;
   

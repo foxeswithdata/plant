@@ -40,7 +40,9 @@ devtools::load_all()
   
   print("ADDING STRESS REGIME MANUALLY")
   head(p$environment$stress_regime)
+
   
+    
   
   
   

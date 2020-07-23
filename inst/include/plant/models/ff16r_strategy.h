@@ -195,6 +195,8 @@ public:
 
   // Set constants within FF16r_Strategy
   void prepare_strategy();
+  
+  void initialize_states(Internals &vars);
 
   // Previously there was an "integrator" here.  I'm going to stick
   // that into Control or FF16r_Environment instead.
@@ -250,8 +252,6 @@ public:
 
   Assimilation<FF16r_Environment> assimilator;
 
-  // make polymorphic
-  virtual ~FF16r_Strategy() {}
   
 };
 

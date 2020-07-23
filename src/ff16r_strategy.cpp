@@ -538,6 +538,10 @@ void FF16r_Strategy::prepare_strategy() {
   area_leaf_0 = area_leaf(height_0);
 }
 
+void FF16r_Strategy::initialize_states(Internals &vars){
+  vars.set_state(state_index.at("height"), height_0);
+}
+
 FF16r_Strategy::ptr make_strategy_ptr(FF16r_Strategy s) {
   s.prepare_strategy();
   return std::make_shared<FF16r_Strategy>(s);

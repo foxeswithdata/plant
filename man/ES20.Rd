@@ -21,7 +21,7 @@ ES20_Cohort(s = ES20_Strategy())
 
 ES20_Species(s = ES20_Strategy())
 
-ES20_Parameters()
+ES20_Parameters(...)
 
 ES20_Patch(p)
 
