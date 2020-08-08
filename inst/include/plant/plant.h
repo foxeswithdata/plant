@@ -63,10 +63,6 @@ public:
 
   void compute_rates(const environment_type &environment,
                          bool reuse_intervals = false) {
-    using std::cout;
-    using std::cerr;
-    using std::endl;
-    printf("in compute rates, strategy is %s", strategy_name());
     strategy->compute_rates(environment, reuse_intervals, vars);
   }
   

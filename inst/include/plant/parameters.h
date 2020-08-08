@@ -34,14 +34,8 @@ struct Parameters {
       disturbance_mean_interval(30),
       cohort_schedule_max_time(NA_REAL),
       hyperpar(hyperpar) {
-    printf ("Parameter constructor printf  \n");
     
-    using std::cout;
-    using std::cerr;
-    using std::endl;
-    cout << "Parameters constructor" << endl;
-    
-        validate();
+      validate();
         
   }
 
@@ -102,10 +96,6 @@ size_t Parameters<T,E>::n_mutants() const {
 // a penalty.  So don't put anything too stupidly heavy in here.
 template <typename T, typename E>
 void Parameters<T,E>::validate() {
-  using std::cout;
-  using std::cerr;
-  using std::endl;
-  cout << "parameters validator " << endl;
   
   //TODO: make this appear in the Control   
   const size_t n_spp = size();

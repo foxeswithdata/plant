@@ -121,6 +121,10 @@ public:
   double canopy_openness(double height) const {
     return get_environment_at_height(height);
   }
+  
+  bool stressed() const {
+    return false;
+  }
 
   double k_I;
   double inflow_rate;

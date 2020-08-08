@@ -37,7 +37,11 @@ public:
   std::vector<std::string> aux_names() {
     std::vector<std::string> ret({
       "competition_effect",
-      "net_mass_production_dt"
+      "net_mass_production_dt",
+      "mass_leaf",
+      "mass_bark",
+      "mass_sapwood",
+      "mass_root"
     });
     // add the associated computation to compute_rates and compute there
     if (collect_all_auxillary) {

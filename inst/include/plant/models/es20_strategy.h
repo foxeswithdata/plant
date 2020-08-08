@@ -53,7 +53,12 @@ public:
     std::vector<std::string> ret({
       "competition_effect",
       "net_mass_production_dt",
-      "dbiomass_dt"
+      "dbiomass_dt",
+      "respiration_dt",
+      "respiration_leaf_dt",
+      "respiration_sapwood_dt",
+      "respiration_root_dt",
+      "respiration_bark_dt"
     });
     return ret;
   }
@@ -147,7 +152,7 @@ public:
   double fecundity_dt(double mass_storage, double height) const;
   
   // [eqn 18] Fraction of mass growth that is leaves
-  double darea_leaf_dmass_live(double area_leaf) const;
+  double darea_leaf_dmass_live(double area_leaf, double height) const;
   
   
   
@@ -158,9 +163,9 @@ public:
   // Mass of leaf needed for new unit area leaf, d m_s / d a_l
   double dmass_leaf_darea_leaf(double area_leaf) const;
   // Mass of stem needed for new unit area leaf, d m_s / d a_l
-  double dmass_sapwood_darea_leaf(double area_leaf) const;
+  double dmass_sapwood_darea_leaf(double area_leaf, double height) const;
   // Mass of bark needed for new unit area leaf, d m_b / d a_l
-  double dmass_bark_darea_leaf(double area_leaf) const;
+  double dmass_bark_darea_leaf(double area_leaf, double height) const;
   // Mass of root needed for new unit area leaf, d m_r / d a_l
   double dmass_root_darea_leaf() const;
   // Growth rate of basal diameter_stem per unit stem area

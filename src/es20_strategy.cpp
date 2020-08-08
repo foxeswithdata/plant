@@ -19,10 +19,6 @@ namespace plant {
 // before physiology, before compound things?)
 // TODO: Consider moving to activating as an initialisation list?
 ES20_Strategy::ES20_Strategy() {
-  using std::cout;
-  using std::cerr;
-  using std::endl;
-  cout << "ES20 strategy constructor" << endl;
   // * Core traits - default values
   lma       = 0.1978791;  // Leaf mass per area [kg / m2]
   rho       = 608.0;      // Wood density [kg/m3]
@@ -83,7 +79,7 @@ ES20_Strategy::ES20_Strategy() {
   a_f3  = 3.0 *  3.8e-5; // [kg per seed]
   
   // Maximum allocation to reproduction
-  a_f1   = 0.005; //[dimensionless]
+  a_f1   = 0.05; //[dimensionless]
   // Size range across which individuals mature
   a_f2   = 50; // [dimensionless]
   
@@ -102,7 +98,8 @@ ES20_Strategy::ES20_Strategy() {
   
   // storage parameters
   // storage allocation parameter [kg kg-1]
-  a_s = 0.06;
+  // a_s = 0.06;
+  a_s = 0.8;
   // time of switch [yr]
   t_s = 0.4109589;
   
@@ -224,98 +221,75 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
                                   bool reuse_intervals,
                                   Internals& vars) {
   
-  using std::cout;
-  using std::flush;
-  using std::endl;
-  
-  cout << "\nES Strategy compute rates |" << flush;
-  
   double height = vars.state(HEIGHT_INDEX);
   
-  cout << "O" << flush;
-  
-  double area_leaf = vars.state(AREA_LEAF_INDEX);
-  
-  cout << "O" << flush;
-  
-  double area_bark = vars.state(AREA_BARK_INDEX);
-  
-  cout << "O" << flush;
-  double area_heartwood = vars.state(AREA_HEARTWOOD_INDEX);
-  cout << "O" << flush;
-  double area_sapwood = vars.state(AREA_SAPWOOD_INDEX);
-  cout << "O" << flush;
-  
-  double mass_leaf = vars.state(MASS_LEAF_INDEX);
-  cout << "O" << flush;
-  double mass_bark = vars.state(MASS_BARK_INDEX);
-  cout << "O" << flush;
-  double mass_sapwood = vars.state(MASS_SAPWOOD_INDEX);
-  cout << "O" << flush;
-  double mass_root = vars.state(MASS_ROOT_INDEX);
-  cout << "O" << flush;
-  
-  double mass_storage = vars.state(MASS_STORAGE_INDEX);
-  cout << "O" << flush;
+  double area_leaf_ = vars.state(AREA_LEAF_INDEX);
+  double area_bark_ = vars.state(AREA_BARK_INDEX);
+  double area_heartwood_ = vars.state(AREA_HEARTWOOD_INDEX);
+  double area_sapwood_ = vars.state(AREA_SAPWOOD_INDEX);
+  double mass_leaf_ = vars.state(MASS_LEAF_INDEX);
+  double mass_bark_ = vars.state(MASS_BARK_INDEX);
+  double mass_sapwood_ = vars.state(MASS_SAPWOOD_INDEX);
+  double mass_root_ = vars.state(MASS_ROOT_INDEX);
+  double mass_storage_ = vars.state(MASS_STORAGE_INDEX);
   
   const double net_mass_production_dt_ =
-    net_mass_production_dt(environment, height, area_leaf, mass_leaf, mass_sapwood,
-                           mass_bark, mass_root, reuse_intervals);
-  cout << "\n net mass production " << net_mass_production_dt_ << endl;
-  cout << "I" << flush;
+    net_mass_production_dt(environment, height, area_leaf_, mass_leaf_, mass_sapwood_,
+                           mass_bark_, mass_root_, reuse_intervals);
   
-  const double dbiomass_dt_ = dbiomass_dt(environment, net_mass_production_dt_);
-  cout << "I" << flush;
-  const double dmass_storage_dt_  = dmass_storage_dt(net_mass_production_dt_, dbiomass_dt_);
-  cout << "I" << flush;
-  
+  const double dbiomass_dt_ = dbiomass_dt(environment, mass_storage_);
+  double dmass_storage_dt_  = dmass_storage_dt(net_mass_production_dt_, dbiomass_dt_);
   // store the aux sate
   vars.set_aux(aux_index.at("net_mass_production_dt"), net_mass_production_dt_);
-  cout << "O" << flush;
   vars.set_aux(aux_index.at("dbiomass_dt"), dbiomass_dt_);
-  cout << "O" << flush;
+  vars.set_aux(aux_index.at("respiration_leaf_dt"), respiration_leaf(mass_leaf_));
+  vars.set_aux(aux_index.at("respiration_bark_dt"), respiration_bark(mass_bark_));
+  vars.set_aux(aux_index.at("respiration_root_dt"), respiration_root(mass_root_));
+  vars.set_aux(aux_index.at("respiration_sapwood_dt"), respiration_sapwood(mass_sapwood_));
+  vars.set_aux(aux_index.at("respiration_dt"), respiration_leaf(mass_leaf_) +
+    respiration_bark(mass_bark_) + respiration_sapwood(mass_sapwood_) + respiration_root(mass_root_));
   
   if (dbiomass_dt_ > 0) {
     
     // Changes in height and leaf area 
     
-    const double dheight_darea_leaf_ = dheight_darea_leaf(area_leaf);
+    const double dheight_darea_leaf_ = dheight_darea_leaf(area_leaf_);
     
-    const double darea_leaf_dmass_live_ = darea_leaf_dmass_live(area_leaf);
+    const double darea_leaf_dmass_live_ = darea_leaf_dmass_live(area_leaf_, height);
     const double darea_leaf_dt_ = area_leaf_dt(darea_leaf_dmass_live_, dbiomass_dt_);
-    const double dmass_leaf_dt_ = mass_leaf_dt(area_leaf, darea_leaf_dt_);
+    const double dmass_leaf_dt_ = mass_leaf_dt(area_leaf_, darea_leaf_dt_);
     
     const double dheight_dt_ = dheight_darea_leaf_ * darea_leaf_dt_;
     
     vars.set_rate(HEIGHT_INDEX, dheight_dt_);
-    vars.set_rate(AREA_LEAF_INDEX, darea_leaf_dt_ - turnover_leaf(area_leaf));
-    vars.set_rate(MASS_LEAF_INDEX, dmass_leaf_dt_ - turnover_leaf(mass_leaf));
+    vars.set_rate(AREA_LEAF_INDEX, darea_leaf_dt_ - turnover_leaf(area_leaf_));
+    vars.set_rate(MASS_LEAF_INDEX, dmass_leaf_dt_ - turnover_leaf(mass_leaf_));
     
     // Changes in sapwood and heartwood
     
-    const double darea_heartwood_dt_ = area_heartwood_dt(area_sapwood);
-    const double dmass_heartwood_dt_ = mass_heartwood_dt(mass_sapwood);
+    const double darea_heartwood_dt_ = area_heartwood_dt(area_sapwood_);
+    const double dmass_heartwood_dt_ = mass_heartwood_dt(mass_sapwood_);
     
     vars.set_rate(state_index.at("area_heartwood"), darea_heartwood_dt_);
     vars.set_rate(state_index.at("mass_heartwood"), dmass_heartwood_dt_);
     
     const double darea_sapwood_dt_ = area_sapwood_dt(darea_leaf_dt_);
-    const double dmass_sapwood_darea_leaf_ = dmass_sapwood_darea_leaf(area_leaf);
+    const double dmass_sapwood_darea_leaf_ = dmass_sapwood_darea_leaf(area_leaf_, height);
     const double dmass_sapwood_dt_ = mass_sapwood_dt(darea_leaf_dt_, dmass_sapwood_darea_leaf_);
     
-    vars.set_rate(state_index.at("area_sapwood"), darea_sapwood_dt_ - turnover_sapwood(area_sapwood));
-    vars.set_rate(state_index.at("mass_sapwood"), dmass_sapwood_dt_ - turnover_sapwood(mass_sapwood));
+    vars.set_rate(state_index.at("area_sapwood"), darea_sapwood_dt_ - turnover_sapwood(area_sapwood_));
+    vars.set_rate(state_index.at("mass_sapwood"), dmass_sapwood_dt_ - turnover_sapwood(mass_sapwood_));
     
     // changes in bark
     const double darea_bark_dt_ = area_bark_dt(darea_leaf_dt_);
     const double dmass_bark_dt_ = mass_bark_dt(dmass_sapwood_dt_);
     
-    vars.set_rate(state_index.at("area_bark"), darea_bark_dt_ - turnover_bark(area_bark));
-    vars.set_rate(state_index.at("mass_bark"), dmass_bark_dt_ - turnover_bark(mass_bark));
+    vars.set_rate(state_index.at("area_bark"), darea_bark_dt_ - turnover_bark(area_bark_));
+    vars.set_rate(state_index.at("mass_bark"), dmass_bark_dt_ - turnover_bark(mass_bark_));
     
     // changes in stem
-    const double darea_stem_dt_ = darea_sapwood_dt_ + darea_heartwood_dt_ + darea_bark_dt_ - turnover_bark(area_bark);
-    const double ddiameter_stem_dt_ = diameter_stem_dt(area_stem(area_heartwood, area_sapwood, area_bark), darea_stem_dt_);
+    const double darea_stem_dt_ = darea_sapwood_dt_ + darea_heartwood_dt_ + darea_bark_dt_ - turnover_bark(area_bark_);
+    const double ddiameter_stem_dt_ = diameter_stem_dt(area_stem(area_heartwood_, area_sapwood_, area_bark_), darea_stem_dt_);
     
     vars.set_rate(state_index.at("diameter_stem"), ddiameter_stem_dt_);
     vars.set_rate(state_index.at("area_stem"), darea_stem_dt_);
@@ -323,31 +297,34 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
     // changes in root
     const double dmass_root_dt_ = mass_root_dt(darea_leaf_dt_);
     
-    vars.set_rate(state_index.at("mass_root"), dmass_root_dt_ - turnover_root(mass_root));
+    vars.set_rate(state_index.at("mass_root"), dmass_root_dt_ - turnover_root(mass_root_));
     
     // fecundity 
     vars.set_rate(FECUNDITY_INDEX,
-                  fecundity_dt(mass_storage, height));
+                  fecundity_dt(mass_storage_, height));
+    
+    // update losses due to reproduction
+    dmass_storage_dt_ = dmass_storage_dt_ - fecundity_dt(mass_storage_, height);
     
   } else {
     vars.set_rate(HEIGHT_INDEX, 0.0);
     vars.set_rate(FECUNDITY_INDEX, 0.0);
-    vars.set_rate(AREA_LEAF_INDEX, - turnover_leaf(area_leaf));
-    vars.set_rate(MASS_LEAF_INDEX, - turnover_leaf(mass_leaf));
-    vars.set_rate(state_index.at("area_heartwood"), turnover_sapwood(area_sapwood));
-    vars.set_rate(state_index.at("mass_heartwood"), turnover_sapwood(mass_sapwood));
-    vars.set_rate(state_index.at("area_sapwood"), - turnover_sapwood(area_sapwood));
-    vars.set_rate(state_index.at("mass_sapwood"), - turnover_sapwood(mass_sapwood));
-    vars.set_rate(state_index.at("area_bark"), - turnover_bark(area_bark));
-    vars.set_rate(state_index.at("mass_bark"), - turnover_bark(mass_bark));
+    vars.set_rate(AREA_LEAF_INDEX, - turnover_leaf(area_leaf_));
+    vars.set_rate(MASS_LEAF_INDEX, - turnover_leaf(mass_leaf_));
+    vars.set_rate(state_index.at("area_heartwood"), turnover_sapwood(area_sapwood_));
+    vars.set_rate(state_index.at("mass_heartwood"), turnover_sapwood(mass_sapwood_));
+    vars.set_rate(state_index.at("area_sapwood"), - turnover_sapwood(area_sapwood_));
+    vars.set_rate(state_index.at("mass_sapwood"), - turnover_sapwood(mass_sapwood_));
+    vars.set_rate(state_index.at("area_bark"), - turnover_bark(area_bark_));
+    vars.set_rate(state_index.at("mass_bark"), - turnover_bark(mass_bark_));
     vars.set_rate(state_index.at("diameter_stem"), 0.0);
-    vars.set_rate(state_index.at("mass_root"), - turnover_root(mass_root));
-    vars.set_rate(state_index.at("area_stem"), - turnover_sapwood(area_bark));
+    vars.set_rate(state_index.at("mass_root"), - turnover_root(mass_root_));
+    vars.set_rate(state_index.at("area_stem"), - turnover_sapwood(area_bark_));
   }
   // [eqn 21] - Instantaneous mortality rate
   vars.set_rate(MASS_STORAGE_INDEX, dmass_storage_dt_);
   vars.set_rate(MORTALITY_INDEX,
-                mortality_dt(mass_storage / mass_live(mass_leaf, mass_bark, mass_sapwood, mass_root), vars.state(MORTALITY_INDEX)));
+                mortality_dt(mass_storage_ / mass_live(mass_leaf_, mass_bark_, mass_sapwood_, mass_root_), vars.state(MORTALITY_INDEX)));
 }
 
 
@@ -387,19 +364,23 @@ double ES20_Strategy::turnover(double mass_leaf, double mass_bark,
 }
 
 double ES20_Strategy::turnover_leaf(double mass) const {
-  return k_l * mass;
+  return 0;
+  // return k_l * mass;
 }
 
 double ES20_Strategy::turnover_bark(double mass) const {
-  return k_b * mass;
+  return 0;
+  // return k_b * mass;
 }
 
 double ES20_Strategy::turnover_sapwood(double mass) const {
-  return k_s * mass;
+  return 0; 
+  // return k_s * mass;
 }
 
 double ES20_Strategy::turnover_root(double mass) const {
-  return k_r * mass;
+  return 0;
+  // return k_r * mass;
 }
 
 // [eqn 15] Net production
@@ -442,10 +423,10 @@ double ES20_Strategy::fecundity_dt(double mass_storage, double height) const {
   return mass_storage * a_f1 / ((omega + a_f3) * (1.0 + exp(a_f2 * (1.0 - height / hmat))));
 }
 
-double ES20_Strategy::darea_leaf_dmass_live(double area_leaf) const {
+double ES20_Strategy::darea_leaf_dmass_live(double area_leaf, double height) const {
   return 1.0/(  dmass_leaf_darea_leaf(area_leaf)
-                  + dmass_sapwood_darea_leaf(area_leaf)
-                  + dmass_bark_darea_leaf(area_leaf)
+                  + dmass_sapwood_darea_leaf(area_leaf, height)
+                  + dmass_bark_darea_leaf(area_leaf, height)
                   + dmass_root_darea_leaf());
 }
 
@@ -461,13 +442,13 @@ double ES20_Strategy::dmass_leaf_darea_leaf(double /* area_leaf */) const {
 }
 
 // Mass of stem needed for new unit area leaf, d m_s / d a_l
-double ES20_Strategy::dmass_sapwood_darea_leaf(double area_leaf) const {
-  return rho * eta_c * a_l1 * theta * (a_l2 + 1.0) * pow(area_leaf, a_l2);
+double ES20_Strategy::dmass_sapwood_darea_leaf(double area_leaf, double height) const {
+  return rho * eta_c * a_l1 * theta * (height + a_l1 * a_l2 * pow(area_leaf, a_l2));
 }
 
 // Mass of bark needed for new unit area leaf, d m_b / d a_l
-double ES20_Strategy::dmass_bark_darea_leaf(double area_leaf) const {
-  return a_b1 * dmass_sapwood_darea_leaf(area_leaf);
+double ES20_Strategy::dmass_bark_darea_leaf(double area_leaf, double height) const {
+  return a_b1 * dmass_sapwood_darea_leaf(area_leaf, height);
 }
 
 // Mass of root needed for new unit area leaf, d m_r / d a_l
@@ -672,9 +653,9 @@ void ES20_Strategy::prepare_strategy() {
 }
 
 void ES20_Strategy::initialize_states(Internals &vars){
-  vars.set_state(state_index.at("height"), height_0);
-  vars.set_state(state_index.at("area_leaf"), area_leaf_0);
-  vars.set_state(state_index.at("mass_leaf"), mass_leaf_0);
+  vars.set_state(HEIGHT_INDEX, height_0);
+  vars.set_state(AREA_LEAF_INDEX, area_leaf_0);
+  vars.set_state(MASS_LEAF_INDEX, mass_leaf_0);
   vars.set_state(state_index.at("area_sapwood"), area_sapwood_0);
   vars.set_state(state_index.at("mass_sapwood"), mass_sapwood_0);
   vars.set_state(state_index.at("area_bark"), area_bark_0);

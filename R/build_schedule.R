@@ -24,6 +24,7 @@ build_schedule <- function(p) {
   eps <- control$schedule_eps
 
   for (i in seq_len(control$schedule_nsteps)) {
+    print(i)
     res <- run_scm_error(p)
     seed_rain_out <- res[["seed_rain"]]
     split <- lapply(res$err$total, function(x) x > eps)

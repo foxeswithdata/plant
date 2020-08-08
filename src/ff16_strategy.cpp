@@ -175,6 +175,10 @@ void FF16_Strategy::update_dependent_aux(const int index, Internals& vars) {
   if (index == HEIGHT_INDEX) {
     double height = vars.state(HEIGHT_INDEX);
     vars.set_aux(aux_index.at("competition_effect"), area_leaf(height));
+    vars.set_aux(aux_index.at("mass_leaf"), mass_leaf(area_leaf(height)));
+    vars.set_aux(aux_index.at("mass_sapwood"), mass_sapwood(area_sapwood(area_leaf(height)), height));
+    vars.set_aux(aux_index.at("mass_bark"), mass_bark(area_leaf(height), height));
+    vars.set_aux(aux_index.at("mass_root"), mass_root(area_leaf(height)));
   }
 }
 

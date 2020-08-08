@@ -45,9 +45,9 @@ class Assimilation {
     
     // Add the stress
     
-    // if((E& dynamic_cast<ES20_Environment&> (environment)) != NULL && environment.stressed()){
-    //   return 0;
-    // }
+    if(environment.stressed()){
+      return 0;
+    }
 
     std::function<double(double)> f;
     if (over_distribution) {

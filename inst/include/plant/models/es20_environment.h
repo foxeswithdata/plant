@@ -20,9 +20,7 @@ class ES20_Environment : public Environment {
 public:
   
   ES20_Environment() {
-    using std::cout;
-    using std::cerr;
-    using std::endl;
+    
     
     //TODO: make this appear in the Control   
     time = 0.0;
@@ -74,12 +72,10 @@ public:
     stress_sd = control.stress_sd;
     
     if(control.generate_stress || control.stress_regime.empty()){
-      cout << "ES20 environment constructor prepare stress " << endl;
       prepare_stress();
     }
     else{
       stress_regime = control.stress_regime;
-      cout << "ES20 environment constructor stress regime there " << endl;
     }
     
   };
@@ -122,6 +118,7 @@ public:
   }
   
   bool stressed() const {
+    
     double yr = floor(time);
     if(time_in_year() < stress_regime[yr]){
       return false;

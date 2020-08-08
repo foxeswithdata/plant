@@ -91,6 +91,9 @@ grow_plant_to_time <- function(plant, times, env) {
   ## things run for now.
   state <- matrix(NA, n, length(y0))
   colnames(state) <- plant$ode_names
+  
+  aux_size <- matrix(NA, n, plant$aux_size)
+  colnames(aux_size) <- plant$aux_names
 
   plant <- vector("list", n)
   while (i <= n) {
@@ -102,6 +105,10 @@ grow_plant_to_time <- function(plant, times, env) {
       runner_detail$step_to(t_next)
       state[i, ] <- runner_detail$state
       plant[[i]] <- runner_detail$object$plant
+      aux <- sapply(runner_detail$object$plant$aux_names, function(x){
+        return(runner_detail$object$plant$aux(x))
+      })
+      aux_size[i, ] <- aux
       i <- i + 1L
       t_next <- times[i] # allows out-of-bounds extraction
     }
@@ -109,7 +116,7 @@ grow_plant_to_time <- function(plant, times, env) {
     y0 <- y1
   }
 
-  list(time=times, state=state, plant=plant, env=env)
+  list(time=times, state=state, aux_size = aux_size, plant=plant, env=env)
 }
 
 ## internal funciton to grab the internal state of the ode runner:
