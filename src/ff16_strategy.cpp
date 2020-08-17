@@ -207,6 +207,10 @@ void FF16_Strategy::compute_rates(const FF16_Environment& environment,
     const double darea_leaf_dmass_live_ = darea_leaf_dmass_live(area_leaf_);
     const double fraction_allocation_growth_ = fraction_allocation_growth(height);
     const double area_leaf_dt = net_mass_production_dt_ * fraction_allocation_growth_ * darea_leaf_dmass_live_;
+    
+    vars.set_aux(aux_index.at("area_leaf_a_l_dt"), area_leaf_ + area_leaf_dt);
+    vars.set_aux(aux_index.at("fraction_allocation_growth"), fraction_allocation_growth_);
+    vars.set_aux(aux_index.at("darea_leaf_dmass_live"), darea_leaf_dmass_live_);
       
     vars.set_rate(HEIGHT_INDEX, dheight_darea_leaf(area_leaf_) * area_leaf_dt);
     vars.set_rate(FECUNDITY_INDEX,

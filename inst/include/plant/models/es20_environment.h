@@ -41,7 +41,7 @@ public:
       }, 0, 1); // these are update with init(x, y) whne patch is created
     
     //TODO: make this appear in the Control    
-    stress_mean = 0.684931506849315;
+    stress_mean = 0.75;
     stress_sd = 0.0684931506849315;
     
     prepare_stress();

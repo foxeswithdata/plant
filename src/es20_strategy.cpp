@@ -31,8 +31,12 @@ ES20_Strategy::ES20_Strategy() {
   // Ratio sapwood area area to leaf area
   theta     = 1.0/4669; // [dimensionless]
   // Height - leaf mass scaling
-  a_l1        = 5.44; // height with 1m2 leaf [m]
-  a_l2        = 0.306; // dimensionless scaling of height with leaf area
+  // a_l1        = 5.44; // height with 1m2 leaf [m]
+  // a_l2        = 0.306; // dimensionless scaling of height with leaf area
+  // Euc Saligna
+  a_l1 = 1.585053;
+  a_l2 = 0.4804506;
+  
   // Root mass per leaf area
   a_r1        = 0.07;  //[kg / m]
   // Ratio of bark area : sapwood area
@@ -99,7 +103,7 @@ ES20_Strategy::ES20_Strategy() {
   // storage parameters
   // storage allocation parameter [kg kg-1]
   // a_s = 0.06;
-  a_s = 0.8;
+  a_s = 0.06 * 365;
   // time of switch [yr]
   t_s = 0.4109589;
   
@@ -222,7 +226,6 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
                                   Internals& vars) {
   
   double height = vars.state(HEIGHT_INDEX);
-  
   double area_leaf_ = vars.state(AREA_LEAF_INDEX);
   double area_bark_ = vars.state(AREA_BARK_INDEX);
   double area_heartwood_ = vars.state(AREA_HEARTWOOD_INDEX);
@@ -239,15 +242,16 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
   
   const double dbiomass_dt_ = dbiomass_dt(environment, mass_storage_);
   double dmass_storage_dt_  = dmass_storage_dt(net_mass_production_dt_, dbiomass_dt_);
+  
   // store the aux sate
   vars.set_aux(aux_index.at("net_mass_production_dt"), net_mass_production_dt_);
   vars.set_aux(aux_index.at("dbiomass_dt"), dbiomass_dt_);
-  vars.set_aux(aux_index.at("respiration_leaf_dt"), respiration_leaf(mass_leaf_));
-  vars.set_aux(aux_index.at("respiration_bark_dt"), respiration_bark(mass_bark_));
-  vars.set_aux(aux_index.at("respiration_root_dt"), respiration_root(mass_root_));
-  vars.set_aux(aux_index.at("respiration_sapwood_dt"), respiration_sapwood(mass_sapwood_));
-  vars.set_aux(aux_index.at("respiration_dt"), respiration_leaf(mass_leaf_) +
-    respiration_bark(mass_bark_) + respiration_sapwood(mass_sapwood_) + respiration_root(mass_root_));
+  vars.set_aux(aux_index.at("respiration_leaf_dt"), a_bio * a_y * respiration_leaf(mass_leaf_,environment));
+  vars.set_aux(aux_index.at("respiration_bark_dt"), a_bio * a_y * respiration_bark(mass_bark_,environment));
+  vars.set_aux(aux_index.at("respiration_root_dt"), a_bio * a_y * respiration_root(mass_root_,environment));
+  vars.set_aux(aux_index.at("respiration_sapwood_dt"), a_bio * a_y * respiration_sapwood(mass_sapwood_,environment));
+  vars.set_aux(aux_index.at("respiration_dt"), a_bio * a_y * (respiration_leaf(mass_leaf_,environment) +
+    respiration_bark(mass_bark_,environment) + respiration_sapwood(mass_sapwood_,environment) + respiration_root(mass_root_,environment)));
   
   if (dbiomass_dt_ > 0) {
     
@@ -256,13 +260,18 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
     const double dheight_darea_leaf_ = dheight_darea_leaf(area_leaf_);
     
     const double darea_leaf_dmass_live_ = darea_leaf_dmass_live(area_leaf_, height);
-    const double darea_leaf_dt_ = area_leaf_dt(darea_leaf_dmass_live_, dbiomass_dt_);
+    const double darea_leaf_dt_ = darea_leaf_dmass_live_ * dbiomass_dt_;
     const double dmass_leaf_dt_ = mass_leaf_dt(area_leaf_, darea_leaf_dt_);
+    
+    vars.set_aux(aux_index.at("area_leaf_a_l_dt"), area_leaf_ + darea_leaf_dt_);
     
     const double dheight_dt_ = dheight_darea_leaf_ * darea_leaf_dt_;
     
+    vars.set_aux(aux_index.at("darea_leaf_dmass_live"), darea_leaf_dmass_live_);
+    
+    
     vars.set_rate(HEIGHT_INDEX, dheight_dt_);
-    vars.set_rate(AREA_LEAF_INDEX, darea_leaf_dt_ - turnover_leaf(area_leaf_));
+    vars.set_rate(AREA_LEAF_INDEX, darea_leaf_dt_);
     vars.set_rate(MASS_LEAF_INDEX, dmass_leaf_dt_ - turnover_leaf(mass_leaf_));
     
     // Changes in sapwood and heartwood
@@ -314,12 +323,12 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
     vars.set_rate(state_index.at("area_heartwood"), turnover_sapwood(area_sapwood_));
     vars.set_rate(state_index.at("mass_heartwood"), turnover_sapwood(mass_sapwood_));
     vars.set_rate(state_index.at("area_sapwood"), - turnover_sapwood(area_sapwood_));
-    vars.set_rate(state_index.at("mass_sapwood"), - turnover_sapwood(mass_sapwood_));
+    vars.set_rate(state_index.at("mass_sapwood"), (- turnover_sapwood(mass_sapwood_))); // <- error in this (?)
     vars.set_rate(state_index.at("area_bark"), - turnover_bark(area_bark_));
     vars.set_rate(state_index.at("mass_bark"), - turnover_bark(mass_bark_));
     vars.set_rate(state_index.at("diameter_stem"), 0.0);
     vars.set_rate(state_index.at("mass_root"), - turnover_root(mass_root_));
-    vars.set_rate(state_index.at("area_stem"), - turnover_sapwood(area_bark_));
+    vars.set_rate(state_index.at("area_stem"), - turnover_bark(area_bark_));
   }
   // [eqn 21] - Instantaneous mortality rate
   vars.set_rate(MASS_STORAGE_INDEX, dmass_storage_dt_);
@@ -331,26 +340,38 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
 // [eqn 13] Total maintenance respiration
 // NOTE: In contrast with Falster ref model, we do not normalise by a_y*a_bio.
 double ES20_Strategy::respiration(double mass_leaf, double mass_sapwood,
-                                  double mass_bark, double mass_root) const {
-  return respiration_leaf(mass_leaf) +
-    respiration_bark(mass_bark) +
-    respiration_sapwood(mass_sapwood) +
-    respiration_root(mass_root);
+                                  double mass_bark, double mass_root, const ES20_Environment& environment) const {
+  return respiration_leaf(mass_leaf, environment) +
+    respiration_bark(mass_bark,environment) +
+    respiration_sapwood(mass_sapwood,environment) +
+    respiration_root(mass_root, environment);
 }
 
-double ES20_Strategy::respiration_leaf(double mass) const {
+double ES20_Strategy::respiration_leaf(double mass, const ES20_Environment& environment) const {
+  if (environment.stressed()){
+    return (r_l/2) * mass;
+  }
   return r_l * mass;
 }
 
-double ES20_Strategy::respiration_bark(double mass) const {
+double ES20_Strategy::respiration_bark(double mass, const ES20_Environment& environment) const {
+  if (environment.stressed()){
+    return (r_b/2) * mass;
+  }
   return r_b * mass;
 }
 
-double ES20_Strategy::respiration_sapwood(double mass) const {
+double ES20_Strategy::respiration_sapwood(double mass, const ES20_Environment& environment) const {
+  if (environment.stressed()){
+    return (r_s/2) * mass;
+  }
   return r_s * mass;
 }
 
-double ES20_Strategy::respiration_root(double mass) const {
+double ES20_Strategy::respiration_root(double mass, const ES20_Environment& environment) const {
+  if (environment.stressed()){
+    return (r_r/2) * mass;
+  }
   return r_r * mass;
 }
 
@@ -374,7 +395,7 @@ double ES20_Strategy::turnover_bark(double mass) const {
 }
 
 double ES20_Strategy::turnover_sapwood(double mass) const {
-  return 0; 
+  return 0;
   // return k_s * mass;
 }
 
@@ -400,7 +421,7 @@ double ES20_Strategy::net_mass_production_dt(const ES20_Environment& environment
   const double assimilation_ = assimilator.assimilate(control, environment, height,
                                                       area_leaf, reuse_intervals);
   const double respiration_ =
-    respiration(mass_leaf, mass_sapwood, mass_bark, mass_root);
+    respiration(mass_leaf, mass_sapwood, mass_bark, mass_root, environment);
   return net_mass_production_dt_A(assimilation_, respiration_);
 }
 
@@ -443,7 +464,7 @@ double ES20_Strategy::dmass_leaf_darea_leaf(double /* area_leaf */) const {
 
 // Mass of stem needed for new unit area leaf, d m_s / d a_l
 double ES20_Strategy::dmass_sapwood_darea_leaf(double area_leaf, double height) const {
-  return rho * eta_c * a_l1 * theta * (height + a_l1 * a_l2 * pow(area_leaf, a_l2));
+  return rho * eta_c *theta * (height + a_l1 * a_l2 * pow(area_leaf, a_l2));
 }
 
 // Mass of bark needed for new unit area leaf, d m_b / d a_l
@@ -629,7 +650,9 @@ double ES20_Strategy::height_seed(void) const {
     return mass_live_given_height(x) - omega;
   };
   
-  return util::uniroot(target, h0, h1, tol, max_iterations);
+  // return util::uniroot(target, h0, h1, tol, max_iterations);
+  
+  return 0.4;
 }
 
 void ES20_Strategy::prepare_strategy() {

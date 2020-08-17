@@ -23,11 +23,11 @@ Control::Control() : integrator(15, 1, 0, 0) {
   environment_light_max_depth = 16;
   environment_rescale_usually = false;
 
-  ode_step_size_initial = 1e-6;
-  ode_step_size_min = 1e-6;
-  ode_step_size_max = 1e-1;
-  ode_tol_rel       = 1e-6;
-  ode_tol_abs       = 1e-6;
+  ode_step_size_initial = 1e-8;
+  ode_step_size_min = 1e-8;
+  ode_step_size_max = 1e-2;
+  ode_tol_rel       = 1e-8;
+  ode_tol_abs       = 1e-8;
   ode_a_y           = 1.0;
   ode_a_dydt        = 0.0;
 
@@ -49,7 +49,7 @@ Control::Control() : integrator(15, 1, 0, 0) {
   equilibrium_solver_try_keep = true;
   
   generate_stress = true;
-  stress_mean = 0.684931506849315;
+  stress_mean = 0.75;
   stress_sd = 0.0684931506849315;
   
 }

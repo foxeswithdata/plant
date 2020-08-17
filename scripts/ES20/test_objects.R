@@ -16,7 +16,7 @@ get_non_stressed_plant_ES20 <- function(){
   p0_es <- scm_base_parameters("ES20")
   p0_es$disturbance_mean_interval <- 30.0
   
-  p1_es <- expand_parameters(trait_matrix(c(1,1), c("a_s", "t_s")), p0_es, FALSE)
+  p1_es <- expand_parameters(trait_matrix(c(365,1), c("a_s", "t_s")), p0_es, FALSE)
   
   return(pl_1_es <- ES20_Plant(s = p1_es$strategies[[1]]))
 }

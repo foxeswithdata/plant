@@ -58,7 +58,9 @@ public:
       "respiration_leaf_dt",
       "respiration_sapwood_dt",
       "respiration_root_dt",
-      "respiration_bark_dt"
+      "respiration_bark_dt",
+      "darea_leaf_dmass_live",
+      "area_leaf_a_l_dt"
     });
     return ret;
   }
@@ -126,12 +128,12 @@ public:
   
   // [eqn 13] Total maintenance respiration
   double respiration(double mass_leaf, double mass_sapwood,
-                     double mass_bark, double mass_root) const;
+                     double mass_bark, double mass_root, const ES20_Environment& environment) const;
   
-  double respiration_leaf(double mass) const;
-  double respiration_bark(double mass) const;
-  double respiration_sapwood(double mass) const;
-  double respiration_root(double mass) const;
+  double respiration_leaf(double mass, const ES20_Environment& environment) const;
+  double respiration_bark(double mass, const ES20_Environment& environment) const;
+  double respiration_sapwood(double mass, const ES20_Environment& environment) const;
+  double respiration_root(double mass, const ES20_Environment& environment) const;
   
   // [eqn 14] Total turnover
   double turnover(double mass_leaf, double mass_bark,

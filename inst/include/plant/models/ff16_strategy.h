@@ -41,7 +41,10 @@ public:
       "mass_leaf",
       "mass_bark",
       "mass_sapwood",
-      "mass_root"
+      "mass_root",
+      "fraction_allocation_growth",
+      "darea_leaf_dmass_live",
+      "area_leaf_a_l_dt"
     });
     // add the associated computation to compute_rates and compute there
     if (collect_all_auxillary) {
