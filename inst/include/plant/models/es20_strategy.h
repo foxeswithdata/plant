@@ -271,6 +271,8 @@ public:
   double t_s;
   // Proportion of storage allocated to biomass
   double a_s;
+  // Proportion of storage as related to initial biomass
+  double b_s;
   
   // Height and leaf area of a (germinated) seed
   double height_0;

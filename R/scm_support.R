@@ -108,7 +108,7 @@ run_scm_collect <- function(p, include_competition_effect=FALSE) {
   collect <- if (include_competition_effect) collect_competition_effect else collect_default
   types <- extract_RcppR6_template_types(p, "Parameters")
 
-  make_environment("FF16", p)
+  make_environment("FF16", p) #TODO: should this be changed to a different make environment?
   scm <- do.call('SCM', types)(p)
   res <- list(collect(scm))
 
@@ -216,7 +216,6 @@ run_scm_error <- function(p) {
 # if you update this function (even syntactic changes) update the function update_smc_support in the scaffolder
 make_hyperpar <- function(type) {
   switch(type,
-         FF16r=make_FF16_hyperpar,
          FF16=make_FF16_hyperpar,
          ES20=make_ES20_hyperpar,
          stop("Unknown type ", type))
@@ -227,7 +226,6 @@ make_hyperpar <- function(type) {
 # if you update this function (even syntactic changes) update the function update_smc_support in the scaffolder
 hyperpar <- function(type) {
   switch(type,
-         FF16r=FF16_hyperpar,
          FF16=FF16_hyperpar,
          ES20=ES20_hyperpar,
          stop("Unknown type ", type))
@@ -363,7 +361,6 @@ make_scm_integrate <- function(obj) {
 make_environment<- function(type, ...) {
   switch(type,
     FF16=FF16_make_environment(...),
-    FF16r=FF16r_make_environment(...),
     ES20=ES20_make_environment(...),
     stop("Unknown type ", type))
 }

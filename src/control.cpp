@@ -25,7 +25,7 @@ Control::Control() : integrator(15, 1, 0, 0) {
 
   ode_step_size_initial = 1e-8;
   ode_step_size_min = 1e-8;
-  ode_step_size_max = 1e-2;
+  ode_step_size_max = 1e-3;
   ode_tol_rel       = 1e-8;
   ode_tol_abs       = 1e-8;
   ode_a_y           = 1.0;

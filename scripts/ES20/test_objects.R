@@ -1,6 +1,6 @@
-get_constant_environment_ES20 <- function(){
+get_constant_environment_ES20 <- function(stress=1){
   ctrl <- equilibrium_verbose(fast_control())
-  ctrl$stress_regime <- rep(1, times=3000)
+  ctrl$stress_regime <- rep(stress, times=3000)
   ctrl$generate_stress <- FALSE
   
   env_es <- ES20_fixed_environment(1.0)
@@ -16,7 +16,7 @@ get_non_stressed_plant_ES20 <- function(){
   p0_es <- scm_base_parameters("ES20")
   p0_es$disturbance_mean_interval <- 30.0
   
-  p1_es <- expand_parameters(trait_matrix(c(365,1), c("a_s", "t_s")), p0_es, FALSE)
+  p1_es <- expand_parameters(trait_matrix(c(365,1, 0.2), c("a_s", "t_s", "height_0")), p0_es, FALSE)
   
   return(pl_1_es <- ES20_Plant(s = p1_es$strategies[[1]]))
 }

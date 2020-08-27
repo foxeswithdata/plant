@@ -31,14 +31,16 @@ pl_ns <- get_non_stressed_plant_ES20()
 p0_es <- scm_base_parameters("ES20")
 p0_es$disturbance_mean_interval <- 30.0
 
-p1_es <- expand_parameters(trait_matrix(c(0.41, 21.9), c("t_s", "a_s")), p0_es, FALSE)
+p1_es <- expand_parameters(trait_matrix(c(0.60, 21.9, 0.2), c("t_s", "a_s", "height_0")), p0_es, FALSE)
 
 pl_1_es <- ES20_Plant(s = p1_es$strategies[[1]])
 
 pl_es <- pl_1_es # ES20_Plant()
 env_es <- ES20_fixed_environment(1.0)
 
-env_es$stress_mean
+# env_es$stress_mean
+# pl_es$ode_state
+# pl_es$ode_names
 
 
 
@@ -49,7 +51,7 @@ env_ff <- FF16_fixed_environment(1.0)
 
 
 # SINGLE YEAR TESTS
-tt <- seq(0, 1, length.out=30)
+tt <- seq(0, 1, length.out=100)
 
 
 # Run single year
@@ -85,13 +87,15 @@ res_ff_df$time <- tt
 
 res_mass_long_es <- pivot_longer(res_es_df, 
                               c('mass_leaf', 'mass_sapwood', 'mass_heartwood', 'mass_bark', 'mass_storage', 'mass_root'), names_to = "mass_type", values_to = "mass_value" )
-res_mass_long_ns <- pivot_longer(res_ns_df, 
+res_mass_long_ns <- pivot_longer(res_ns_df,
                               c('mass_leaf', 'mass_sapwood', 'mass_heartwood', 'mass_bark', 'mass_storage', 'mass_root'), names_to = "mass_type", values_to = "mass_value" )
 
 
 
 res_all <- rbind(res_ns_df, res_es_df)
 res_all <- plyr::rbind.fill(res_all, res_ff_df)
+
+# res_all <- res_es_df
 # Plot some results
 
 ## Firstly height
@@ -110,7 +114,15 @@ coeff = 20
 
 p <- ggplot(res_all, aes(x = time)) + 
   geom_line(aes(y = mass_storage, color = model)) +
-  geom_line(aes(y = mass_storage/(mass_sapwood+mass_leaf+mass_bark+mass_root)/coeff, color=model), linetype = "dashed") +
+  # geom_line(aes(y = (mass_storage/(mass_sapwood+mass_leaf+mass_bark+mass_root))/coeff, color=model), linetype = "dashed") +
+  scale_x_continuous(name = "Time (yr)") +
+  scale_y_continuous(name = "Mass Storage(kg)",
+                     sec.axis = sec_axis(~.*coeff, name = "Proportion Storage of Live Biomass"))+ 
+  theme_linedraw()
+p
+
+p <- ggplot(res_all, aes(x = time)) + 
+  geom_line(aes(y = (mass_storage/(mass_sapwood+mass_leaf+mass_bark+mass_root)), color=model), linetype = "dashed") +
   scale_x_continuous(name = "Time (yr)") +
   scale_y_continuous(name = "Mass Storage(kg)",
                      sec.axis = sec_axis(~.*coeff, name = "Proportion Storage of Live Biomass"))+ 
@@ -129,6 +141,7 @@ p <- ggplot(res_all, aes(x = time, y = net_mass_production_dt)) +
   theme_linedraw()
 
 p
+
 
 
 ## Let's do some stacked mass graphs
@@ -189,6 +202,13 @@ p <- ggplot(res_all, aes(x=time, y = mortality, color = model)) +
   geom_line() + 
   scale_x_continuous(name = "Time (yr)") +
   scale_y_continuous(name = "Mortality (?)")+ 
+  theme_linedraw()
+p
+
+p <- ggplot(res_all, aes(x=time, y = fecundity, color = model)) + 
+  geom_line() + 
+  scale_x_continuous(name = "Time (yr)") +
+  scale_y_continuous(name = "Fecundity (?)")+ 
   theme_linedraw()
 p
 

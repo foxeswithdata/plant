@@ -3,7 +3,7 @@
 # restart R - clear the C++ output files cache (can't find a different way of doing this. 
 # Makes sure the latest compiled version is used)
 rm(list = ls())
-# .rs.restartR()
+.rs.restartR()
 
 gc()
 setwd("~/R/plant")
@@ -28,8 +28,14 @@ env_es <- ES20_fixed_environment(1.0)
 
 
 # SINGLE YEAR TESTS
-tt <- seq(0, 1, length.out=30)
-
+tt <- seq(0, 2, length.out=30)
 
 # Run single year
 res_es <- grow_plant_to_time(pl_es, tt, env_es)
+res_ns <- grow_plant_to_time(pl_ns, tt, env_ns)
+
+
+plot(tt ~ height , res_es$state)
+
+plot(height ~ tt , res_ns$state)
+     

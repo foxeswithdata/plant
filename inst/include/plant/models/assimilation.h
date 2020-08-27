@@ -8,6 +8,8 @@
 #include <plant/qag_internals.h> // quadrature::intervals_type
 #include <plant/internals.h> // quadrature::intervals_type
 
+#include <iostream>
+
 namespace plant {
 
 template <typename E>
@@ -63,7 +65,9 @@ class Assimilation {
     if (control.plant_assimilation_adaptive && reuse_intervals) {
       A = control.integrator.integrate_with_last_intervals(f, x_min, x_max);
     } else {
+      // std::cout << "I"<<"height: "<< height<< " time: "<<environment.time<<std::endl;
       A = control.integrator.integrate(f, x_min, x_max);
+      // std::cout << "O";
     }
 
     return area_leaf * A;

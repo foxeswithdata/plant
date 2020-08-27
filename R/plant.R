@@ -73,7 +73,7 @@ grow_plant_to_time <- function(plant, times, env) {
   if (n == 0L) {
     stop("At least one time must be given")
   }
-
+  
   y0 <- plant$ode_state
   t0 <- 0.0
   i <- 1L
@@ -85,6 +85,7 @@ grow_plant_to_time <- function(plant, times, env) {
 
   runner <- OdeRunner(strategy_name)(pr1)
   runner_detail <- OdeRunner(strategy_name)(pr2)
+  
 
   ## TODO: This could also be done by better configuring the
   ## underlying ODE runner, but this seems a reasonable way of getting
@@ -92,14 +93,27 @@ grow_plant_to_time <- function(plant, times, env) {
   state <- matrix(NA, n, length(y0))
   colnames(state) <- plant$ode_names
   
+
   aux_size <- matrix(NA, n, plant$aux_size)
   colnames(aux_size) <- plant$aux_names
 
+  ## For the detailed runner outputs
+  state_detail <- matrix(NA, n, length(y0))
+  colnames(state_detail) <- plant$ode_names
+
+  aux_size_detail <- matrix(NA, n, plant$aux_size)
+  colnames(aux_size_detail) <- plant$aux_names
+  
+
+  
   plant <- vector("list", n)
+  
   while (i <= n) {
     runner$step()
+    
     t1 <- runner$time
     y1 <- runner$state
+    
     while (t_next < t1 && i <= n) {
       runner_detail$set_state(y0, t0)
       runner_detail$step_to(t_next)
