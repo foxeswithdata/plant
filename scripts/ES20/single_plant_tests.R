@@ -51,7 +51,7 @@ env_ff <- FF16_fixed_environment(1.0)
 
 
 # SINGLE YEAR TESTS
-tt <- seq(0, 1, length.out=100)
+tt <- seq(0, 10, length.out=100)
 
 
 # Run single year
@@ -109,23 +109,20 @@ p
 
 ## Now the storage mass and proportion (should be on same graph at a later stage)
 
-coeff = 20
 
 
 p <- ggplot(res_all, aes(x = time)) + 
   geom_line(aes(y = mass_storage, color = model)) +
   # geom_line(aes(y = (mass_storage/(mass_sapwood+mass_leaf+mass_bark+mass_root))/coeff, color=model), linetype = "dashed") +
   scale_x_continuous(name = "Time (yr)") +
-  scale_y_continuous(name = "Mass Storage(kg)",
-                     sec.axis = sec_axis(~.*coeff, name = "Proportion Storage of Live Biomass"))+ 
+  scale_y_continuous(name = "Mass Storage(kg)")+ 
   theme_linedraw()
 p
 
 p <- ggplot(res_all, aes(x = time)) + 
   geom_line(aes(y = (mass_storage/(mass_sapwood+mass_leaf+mass_bark+mass_root)), color=model), linetype = "dashed") +
   scale_x_continuous(name = "Time (yr)") +
-  scale_y_continuous(name = "Mass Storage(kg)",
-                     sec.axis = sec_axis(~.*coeff, name = "Proportion Storage of Live Biomass"))+ 
+  scale_y_continuous(name = "Proportion Storage of Live Biomass")+
   theme_linedraw()
 p
 
@@ -198,10 +195,18 @@ p <- ggplot(res_all, aes(x=time, y = log(fecundity), color = model)) +
 p
 
 
-p <- ggplot(res_all, aes(x=time, y = mortality, color = model)) + 
+p <- ggplot(res_es_df, aes(x=time, y = mortality, color = model)) + 
   geom_line() + 
   scale_x_continuous(name = "Time (yr)") +
-  scale_y_continuous(name = "Mortality (?)")+ 
+  scale_y_continuous(name = "Mortality (yr^-1)")+ 
+  theme_linedraw()
+p
+
+
+p <- ggplot(res_es_df, aes(x=mass_storage/(mass_sapwood+mass_leaf+mass_bark+mass_root), y = mortality, color = model)) + 
+  geom_point() + 
+  scale_x_continuous(name = "Storage Proportion") +
+  scale_y_continuous(name = "Mortality (yr^-1)")+ 
   theme_linedraw()
 p
 

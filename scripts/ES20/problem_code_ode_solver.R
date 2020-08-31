@@ -1,10 +1,7 @@
-##LOAD LATEST PACKAGE
-
-# restart R - clear the C++ output files cache (can't find a different way of doing this. 
-# Makes sure the latest compiled version is used)
 rm(list = ls())
-.rs.restartR()
+# .rs.restartR()
 
+# rm(list = ls())
 gc()
 setwd("~/R/plant")
 # library(deSolve)
@@ -14,28 +11,36 @@ library(tidyverse)
 RcppR6::install(".")
 devtools::load_all()
 
-##PREPARE PLANT
+source('scripts/ES20/test_objects.R')
 
-# Normal regular stressed plant
+ts_values <- seq(from=0, to=0.75, by=0.005)
+h_0_values <- seq(from=0.5, to=40, by=0.5)
+# h_0_values <- seq(from=0.2, to=1, by=0.2)
+b_s_values <- seq(from=0.02, to=0.5, by=0.02)
+# b_s_values <- seq(from=0.02, to=0.5, by=0.06)
+
+print("Problematic Values")
+print("height0")
+print(h_0_values[27])
+print("b_s")
+print(b_s_values[23])
+print("ts")
+print(paste(c(ts_values[18] * 365), "d"), collapse=" ") #NoteL for ts_values <i=18 and 19 and 20 this has actually worked. it's so weird
 
 p0_es <- scm_base_parameters("ES20")
 p0_es$disturbance_mean_interval <- 30.0
-p1_es <- expand_parameters(trait_matrix(c(0.41, 21.9), c("t_s", "a_s")), p0_es, FALSE)
+
+p1_es <- expand_parameters(trait_matrix(c(ts_values[18], 21.9, h_0_values[27], b_s_values[23]), c("t_s", "a_s", "height_0", "b_s")), p0_es, FALSE)
 pl_1_es <- ES20_Plant(s = p1_es$strategies[[1]])
-
 pl_es <- pl_1_es # ES20_Plant()
-env_es <- ES20_fixed_environment(1.0)
+env_es <- get_constant_environment_ES20(stress=0.75)
 
-
-# SINGLE YEAR TESTS
-tt <- seq(0, 2, length.out=30)
+tt <- seq(0, 1.1, length.out=100)
 
 # Run single year
 res_es <- grow_plant_to_time(pl_es, tt, env_es)
-res_ns <- grow_plant_to_time(pl_ns, tt, env_ns)
+res_es_df <- as.data.frame(res_es$state)
 
 
-plot(tt ~ height , res_es$state)
 
-plot(height ~ tt , res_ns$state)
-     
+

@@ -208,7 +208,7 @@ void ES20_Strategy::update_dependent_aux(const int index, Internals& vars) {
 
 double ES20_Strategy::dbiomass_dt(const ES20_Environment& environment, 
                                   double mass_storage) const {
-  if (environment.time_in_year() < t_s || mass_storage > 0){
+  if (environment.time_in_year() < t_s && mass_storage > 0){
     return mass_storage * a_s;
   }
   else {
@@ -227,7 +227,7 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
                                   bool reuse_intervals,
                                   Internals& vars) {
   
-  // std::cout << "TIME: "<< environment.time << std::endl;
+  std::cout << "TIME: "<< environment.time << std::endl;
   
   double height = vars.state(HEIGHT_INDEX);
   double area_leaf_ = vars.state(AREA_LEAF_INDEX);
@@ -245,19 +245,19 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
     vars.set_state(state_index.at("area_leaf"), 0);
   }
   
-  // std::cout << "area_leaf: " << area_leaf_ << std::endl;
-  // std::cout << "storage 1: " << mass_storage_ << std::endl;
+  std::cout << "area_leaf: " << area_leaf_ << std::endl;
+  std::cout << "storage 1: " << mass_storage_ << std::endl;
   
   const double net_mass_production_dt_ =
     net_mass_production_dt(environment, height, area_leaf_, mass_leaf_, mass_sapwood_,
                            mass_bark_, mass_root_, reuse_intervals);
   
-  // std::cout << "A : " << net_mass_production_dt_ << std::endl;
+  std::cout << "A : " << net_mass_production_dt_ << std::endl;
   
   const double dbiomass_dt_ = dbiomass_dt(environment, mass_storage_);
   double dmass_storage_dt_  = dmass_storage_dt(net_mass_production_dt_, dbiomass_dt_);
-  
-  // std::cout << "storage 2: " << mass_storage_ << " rate: " << dmass_storage_dt_ << std::endl;
+  // 
+  std::cout << "storage 2: " << mass_storage_ << " rate: " << dmass_storage_dt_ << std::endl;
   
   // store the aux sate
   vars.set_aux(aux_index.at("net_mass_production_dt"), net_mass_production_dt_);
@@ -269,7 +269,7 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
   vars.set_aux(aux_index.at("respiration_dt"), a_bio * a_y * (respiration_leaf(mass_leaf_,environment) +
     respiration_bark(mass_bark_,environment) + respiration_sapwood(mass_sapwood_,environment) + respiration_root(mass_root_,environment)));
   
-  // std::cout << "net bio: "<< dbiomass_dt_ << std::endl;
+  std::cout << "net bio: "<< dbiomass_dt_ << std::endl;
   
   if (dbiomass_dt_ > 0) {
     
@@ -277,13 +277,13 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
     
     const double dheight_darea_leaf_ = dheight_darea_leaf(area_leaf_);
     
-    // std::cout<< "dheight_darea_leaf " << dheight_darea_leaf_ <<std::endl;
+    std::cout<< "dheight_darea_leaf " << dheight_darea_leaf_ <<std::endl;
     
     const double darea_leaf_dmass_live_ = darea_leaf_dmass_live(area_leaf_, height);
     const double darea_leaf_dt_ = darea_leaf_dmass_live_ * dbiomass_dt_;
     const double dmass_leaf_dt_ = mass_leaf_dt(area_leaf_, darea_leaf_dt_);
     
-    // std::cout<< "Leaf area " << area_leaf_ << " Rate:  " << darea_leaf_dt_ << " Turnover: " << turnover_leaf(area_leaf_) << " Both: " <<  darea_leaf_dt_ - turnover_leaf(area_leaf_) << std::endl;
+    std::cout<< "Leaf area " << area_leaf_ << " Rate:  " << darea_leaf_dt_ << " Turnover: " << turnover_leaf(area_leaf_) << " Both: " <<  darea_leaf_dt_ - turnover_leaf(area_leaf_) << std::endl;
     
     vars.set_aux(aux_index.at("area_leaf_a_l_dt"), area_leaf_ + darea_leaf_dt_);
     
@@ -291,7 +291,7 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
     
     vars.set_aux(aux_index.at("darea_leaf_dmass_live"), darea_leaf_dmass_live_);
     
-    // std::cout<< "Height: " << height << " Rate: " << dheight_dt_ << std::endl;
+    std::cout<< "Height: " << height << " Rate: " << dheight_dt_ << std::endl;
     
     vars.set_rate(HEIGHT_INDEX, dheight_dt_);
     vars.set_rate(AREA_LEAF_INDEX, darea_leaf_dt_ - turnover_leaf(area_leaf_));
@@ -340,7 +340,7 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
     
   } else {
     vars.set_rate(HEIGHT_INDEX, 0.0);
-    // std::cout<< "Height: " << height << " Rate: " << 0 << std::endl;
+    std::cout<< "Height: " << height << " Rate: " << 0 << std::endl;
     vars.set_rate(FECUNDITY_INDEX, 0.0);
     vars.set_rate(AREA_LEAF_INDEX, - turnover_leaf(area_leaf_));
     vars.set_rate(MASS_LEAF_INDEX, - turnover_leaf(mass_leaf_));
@@ -358,6 +358,8 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
   vars.set_rate(MASS_STORAGE_INDEX, dmass_storage_dt_);
   vars.set_rate(MORTALITY_INDEX,
                 mortality_dt(mass_storage_ / mass_live(mass_leaf_, mass_bark_, mass_sapwood_, mass_root_), vars.state(MORTALITY_INDEX)));
+  
+  std::cout<< "Finished compute rates "<< std::endl;
 }
 
 
@@ -610,9 +612,6 @@ double ES20_Strategy::mortality_growth_independent_dt() const {
 }
 
 double ES20_Strategy::mortality_growth_dependent_dt(double storage_portion) const {
-  if(storage_portion <= 0){
-    return 1;
-  }
   return a_dG1 * exp(-a_dG2 * storage_portion);
 }
 

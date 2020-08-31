@@ -24,10 +24,10 @@ Control::Control() : integrator(15, 1, 0, 0) {
   environment_rescale_usually = false;
 
   ode_step_size_initial = 1e-8;
-  ode_step_size_min = 1e-8;
-  ode_step_size_max = 1e-3;
-  ode_tol_rel       = 1e-8;
-  ode_tol_abs       = 1e-8;
+  ode_step_size_min = 1e-15;
+  ode_step_size_max = 1e-4;
+  ode_tol_rel       = 1e-6;
+  ode_tol_abs       = 1e-6;
   ode_a_y           = 1.0;
   ode_a_dydt        = 0.0;
 

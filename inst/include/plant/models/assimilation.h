@@ -65,9 +65,9 @@ class Assimilation {
     if (control.plant_assimilation_adaptive && reuse_intervals) {
       A = control.integrator.integrate_with_last_intervals(f, x_min, x_max);
     } else {
-      // std::cout << "I"<<"height: "<< height<< " time: "<<environment.time<<std::endl;
+      std::cout << "I"<<" height: "<< height<< " time: "<<environment.time<<std::endl;
       A = control.integrator.integrate(f, x_min, x_max);
-      // std::cout << "O";
+      std::cout << "O" << std::endl;
     }
 
     return area_leaf * A;
