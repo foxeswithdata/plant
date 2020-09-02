@@ -51,7 +51,7 @@ env_ff <- FF16_fixed_environment(1.0)
 
 
 # SINGLE YEAR TESTS
-tt <- seq(0, 10, length.out=100)
+tt <- seq(0, 15, length.out=100)
 
 
 # Run single year
