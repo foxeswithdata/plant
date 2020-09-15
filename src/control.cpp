@@ -6,11 +6,11 @@ Control::Control() : integrator(15, 1, 0, 0) {
   plant_assimilation_adaptive = true;
 
   plant_assimilation_over_distribution = false;
-  plant_assimilation_tol = 1e-6;
+  plant_assimilation_tol = 1e-8;
   plant_assimilation_iterations = 1000;
   plant_assimilation_rule = 21;
 
-  plant_seed_tol = 1e-8;
+  plant_seed_tol = 1e-7;
   plant_seed_iterations = 1000;
 
   cohort_gradient_eps = 1e-6;
@@ -23,9 +23,9 @@ Control::Control() : integrator(15, 1, 0, 0) {
   environment_light_max_depth = 16;
   environment_rescale_usually = false;
 
-  ode_step_size_initial = 1e-8;
-  ode_step_size_min = 1e-15;
-  ode_step_size_max = 1e-4;
+  ode_step_size_initial = 1e-6;
+  ode_step_size_min = 1e-8;
+  ode_step_size_max = 1e-2;
   ode_tol_rel       = 1e-6;
   ode_tol_abs       = 1e-6;
   ode_a_y           = 1.0;

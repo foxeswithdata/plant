@@ -187,8 +187,10 @@ make_ES20_hyperpar <- function(
     ## So respiration rates per unit mass vary with rho, respiration
     ## rates per unit volume don't.
     r_s <- B_rs1 / rho
+    r_s <- 2.412504
     # bark respiration follows from sapwood
     r_b <- B_rb1 / rho
+    r_b <- 2 * 2.412504
 
     ## omega / accessory cost relationship
     a_f3 <- B_f1 * omega

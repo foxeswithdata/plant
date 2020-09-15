@@ -31,6 +31,7 @@ pl_ns <- get_non_stressed_plant_ES20()
 p0_es <- scm_base_parameters("ES20")
 p0_es$disturbance_mean_interval <- 30.0
 
+
 p1_es <- expand_parameters(trait_matrix(c(0.60, 21.9, 0.2), c("t_s", "a_s", "height_0")), p0_es, FALSE)
 
 pl_1_es <- ES20_Plant(s = p1_es$strategies[[1]])
@@ -42,22 +43,22 @@ env_es <- ES20_fixed_environment(1.0)
 # pl_es$ode_state
 # pl_es$ode_names
 
-
+pl_es$strategy$r_s
 
 # FF16 plant 
 
-pl_ff <- FF16_Plant()
-env_ff <- FF16_fixed_environment(1.0)
+# pl_ff <- FF16_Plant()
+# env_ff <- FF16_fixed_environment(1.0)
 
 
 # SINGLE YEAR TESTS
-tt <- seq(0, 15, length.out=100)
+tt <- seq(0, 25, length.out=100)
 
 
 # Run single year
-res_ns <- grow_plant_to_time(pl_ns, tt, env_ns)
+# res_ns <- grow_plant_to_time(pl_ns, tt, env_ns)
 res_es <- grow_plant_to_time(pl_es, tt, env_es)
-res_ff <- grow_plant_to_time(pl_ff, tt, env_ff)
+# res_ff <- grow_plant_to_time(pl_ff, tt, env_ff)
 
 
 res_ns_df <- as.data.frame(res_ns$state)
@@ -90,12 +91,22 @@ res_mass_long_es <- pivot_longer(res_es_df,
 res_mass_long_ns <- pivot_longer(res_ns_df,
                               c('mass_leaf', 'mass_sapwood', 'mass_heartwood', 'mass_bark', 'mass_storage', 'mass_root'), names_to = "mass_type", values_to = "mass_value" )
 
+percent <- res_mass_long_es  %>%
+  subset(mass_type %in% c('mass_leaf', 'mass_sapwood', 'mass_bark', 'mass_root')) %>%
+  group_by(time, mass_type) %>%
+  summarise(n = sum(mass_value)) %>%
+  mutate(percentage = n / sum(n))
 
+percent_hd <- res_mass_long_es  %>%
+  subset(mass_type %in% c('mass_leaf', 'mass_sapwood', 'mass_bark', 'mass_root', 'mass_heartwood')) %>%
+  group_by(time, mass_type) %>%
+  summarise(n = sum(mass_value)) %>%
+  mutate(percentage = n / sum(n))
 
 res_all <- rbind(res_ns_df, res_es_df)
 res_all <- plyr::rbind.fill(res_all, res_ff_df)
 
-# res_all <- res_es_df
+res_all <- res_es_df
 # Plot some results
 
 ## Firstly height
@@ -107,7 +118,7 @@ p <- ggplot(res_all, aes(x = time, y = height)) +
   theme_linedraw()
 p
 
-## Now the storage mass and proportion (should be on same graph at a later stage)
+  ## Now the storage mass and proportion (should be on same graph at a later stage)
 
 
 
@@ -120,9 +131,9 @@ p <- ggplot(res_all, aes(x = time)) +
 p
 
 p <- ggplot(res_all, aes(x = time)) + 
-  geom_line(aes(y = (mass_storage/(mass_sapwood+mass_leaf+mass_bark+mass_root)), color=model), linetype = "dashed") +
+  geom_line(aes(y = (mass_storage/(mass_sapwood+mass_leaf+mass_bark+mass_root + mass_storage)), color=model), linetype = "dashed") +
   scale_x_continuous(name = "Time (yr)") +
-  scale_y_continuous(name = "Proportion Storage of Live Biomass")+
+  scale_y_continuous(name = "Storage Concentration")+
   theme_linedraw()
 p
 
@@ -149,6 +160,20 @@ p <- ggplot(res_mass_long_es_sub, aes(x = time, y = mass_value, fill = mass_type
   geom_area(alpha=0.5) + 
   scale_x_continuous(name = "Time (yr)") +
   scale_y_continuous(name = "Plant Mass Pools kgC") + 
+  theme_linedraw()
+p
+
+p <- ggplot(percent, aes(x = time, y = percentage * 100, fill = mass_type)) + 
+  geom_area(alpha=0.5) + 
+  scale_x_continuous(name = "Time (yr)") +
+  scale_y_continuous(name = "Percentage total live biomass") + 
+  theme_linedraw()
+p
+
+p <- ggplot(percent_hd, aes(x = time, y = percentage * 100, fill = mass_type)) + 
+  geom_area(alpha=0.5) + 
+  scale_x_continuous(name = "Time (yr)") +
+  scale_y_continuous(name = "Percentage total biomass") + 
   theme_linedraw()
 p
 
@@ -237,10 +262,10 @@ p
 
 
 
-p <- ggplot(res_all, aes(x=area_leaf, y = height, color = model)) + 
+p <- ggplot(res_all, aes(y=area_leaf, x = height, color = model)) + 
   geom_point() + 
-  scale_x_continuous(name = "Area Leaf (m2)") +
-  scale_y_continuous(name = "Height (m)") + 
+  scale_y_continuous(name = "Area Leaf (m2)") +
+  scale_x_continuous(name = "Height (m)") + 
   theme_linedraw()
 p
 

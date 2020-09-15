@@ -54,7 +54,7 @@ ES20_Strategy::ES20_Strategy() {
   // Sapwood respiration per stem mass  [mol CO2 / yr / kg]
   // = respiration per volume [mol CO2 / m3 / yr]
   // /  wood density [kg/m3]
-  r_s   = 4012.0 / 608.0;
+  r_s   = 2.412504;
   // Bark respiration per stem mass
   // assumed to be twice rate of sapwood
   // (NOTE that there is a re-parametrisation here relative to the paper
@@ -227,7 +227,7 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
                                   bool reuse_intervals,
                                   Internals& vars) {
   
-  std::cout << "TIME: "<< environment.time << std::endl;
+  // std::cout << "TIME: "<< environment.time << std::endl;
   
   double height = vars.state(HEIGHT_INDEX);
   double area_leaf_ = vars.state(AREA_LEAF_INDEX);
@@ -245,19 +245,19 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
     vars.set_state(state_index.at("area_leaf"), 0);
   }
   
-  std::cout << "area_leaf: " << area_leaf_ << std::endl;
-  std::cout << "storage 1: " << mass_storage_ << std::endl;
+  // std::cout << "area_leaf: " << area_leaf_ << std::endl;
+  // std::cout << "storage 1: " << mass_storage_ << std::endl;
   
   const double net_mass_production_dt_ =
     net_mass_production_dt(environment, height, area_leaf_, mass_leaf_, mass_sapwood_,
                            mass_bark_, mass_root_, reuse_intervals);
   
-  std::cout << "A : " << net_mass_production_dt_ << std::endl;
+  // std::cout << "A : " << net_mass_production_dt_ << std::endl;
   
   const double dbiomass_dt_ = dbiomass_dt(environment, mass_storage_);
   double dmass_storage_dt_  = dmass_storage_dt(net_mass_production_dt_, dbiomass_dt_);
   // 
-  std::cout << "storage 2: " << mass_storage_ << " rate: " << dmass_storage_dt_ << std::endl;
+  // std::cout << "storage 2: " << mass_storage_ << " rate: " << dmass_storage_dt_ << std::endl;
   
   // store the aux sate
   vars.set_aux(aux_index.at("net_mass_production_dt"), net_mass_production_dt_);
@@ -269,21 +269,19 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
   vars.set_aux(aux_index.at("respiration_dt"), a_bio * a_y * (respiration_leaf(mass_leaf_,environment) +
     respiration_bark(mass_bark_,environment) + respiration_sapwood(mass_sapwood_,environment) + respiration_root(mass_root_,environment)));
   
-  std::cout << "net bio: "<< dbiomass_dt_ << std::endl;
+  // std::cout << "net bio: "<< dbiomass_dt_ << std::endl;
   
   if (dbiomass_dt_ > 0) {
     
-    // Changes in height and leaf area 
+    const double dheight_darea_leaf_ = dheight_darea_leaf(area_leaf_, height);
     
-    const double dheight_darea_leaf_ = dheight_darea_leaf(area_leaf_);
+    // std::cout<< "dheight_darea_leaf " << dheight_darea_leaf_ <<std::endl;
     
-    std::cout<< "dheight_darea_leaf " << dheight_darea_leaf_ <<std::endl;
-    
-    const double darea_leaf_dmass_live_ = darea_leaf_dmass_live(area_leaf_, height);
+    const double darea_leaf_dmass_live_ = darea_leaf_dmass_live(area_leaf_, height, mass_sapwood_);
     const double darea_leaf_dt_ = darea_leaf_dmass_live_ * dbiomass_dt_;
     const double dmass_leaf_dt_ = mass_leaf_dt(area_leaf_, darea_leaf_dt_);
     
-    std::cout<< "Leaf area " << area_leaf_ << " Rate:  " << darea_leaf_dt_ << " Turnover: " << turnover_leaf(area_leaf_) << " Both: " <<  darea_leaf_dt_ - turnover_leaf(area_leaf_) << std::endl;
+    // std::cout<< "Leaf area " << area_leaf_ << " Rate:  " << darea_leaf_dt_ << " Turnover: " << turnover_leaf(area_leaf_) << " Both: " <<  darea_leaf_dt_ - turnover_leaf(area_leaf_) << std::endl;
     
     vars.set_aux(aux_index.at("area_leaf_a_l_dt"), area_leaf_ + darea_leaf_dt_);
     
@@ -291,7 +289,7 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
     
     vars.set_aux(aux_index.at("darea_leaf_dmass_live"), darea_leaf_dmass_live_);
     
-    std::cout<< "Height: " << height << " Rate: " << dheight_dt_ << std::endl;
+    // std::cout<< "Height: " << height << " Rate: " << dheight_dt_ << std::endl;
     
     vars.set_rate(HEIGHT_INDEX, dheight_dt_);
     vars.set_rate(AREA_LEAF_INDEX, darea_leaf_dt_ - turnover_leaf(area_leaf_));
@@ -306,7 +304,7 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
     vars.set_rate(state_index.at("mass_heartwood"), dmass_heartwood_dt_);
     
     const double darea_sapwood_dt_ = area_sapwood_dt(darea_leaf_dt_);
-    const double dmass_sapwood_darea_leaf_ = dmass_sapwood_darea_leaf(area_leaf_, height);
+    const double dmass_sapwood_darea_leaf_ = dmass_sapwood_darea_leaf(area_leaf_, height, mass_sapwood_);
     const double dmass_sapwood_dt_ = mass_sapwood_dt(darea_leaf_dt_, dmass_sapwood_darea_leaf_);
     
     vars.set_rate(state_index.at("area_sapwood"), darea_sapwood_dt_ - turnover_sapwood(area_sapwood_));
@@ -340,7 +338,7 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
     
   } else {
     vars.set_rate(HEIGHT_INDEX, 0.0);
-    std::cout<< "Height: " << height << " Rate: " << 0 << std::endl;
+    // std::cout<< "Height: " << height << " Rate: " << 0 << std::endl;
     vars.set_rate(FECUNDITY_INDEX, 0.0);
     vars.set_rate(AREA_LEAF_INDEX, - turnover_leaf(area_leaf_));
     vars.set_rate(MASS_LEAF_INDEX, - turnover_leaf(mass_leaf_));
@@ -359,7 +357,7 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
   vars.set_rate(MORTALITY_INDEX,
                 mortality_dt(mass_storage_ / mass_live(mass_leaf_, mass_bark_, mass_sapwood_, mass_root_), vars.state(MORTALITY_INDEX)));
   
-  std::cout<< "Finished compute rates "<< std::endl;
+  // std::cout<< "Finished compute rates "<< std::endl;
 }
 
 
@@ -470,17 +468,18 @@ double ES20_Strategy::fecundity_dt(double mass_storage, double height) const {
   return mass_storage * a_f1 / ((omega + a_f3) * (1.0 + exp(a_f2 * (1.0 - height / hmat))));
 }
 
-double ES20_Strategy::darea_leaf_dmass_live(double area_leaf, double height) const {
+double ES20_Strategy::darea_leaf_dmass_live(double area_leaf, double height, double mass_sapwood) const {
   return 1.0/(  dmass_leaf_darea_leaf(area_leaf)
-                  + dmass_sapwood_darea_leaf(area_leaf, height)
-                  + dmass_bark_darea_leaf(area_leaf, height)
+                  + dmass_sapwood_darea_leaf(area_leaf, height, mass_sapwood)
+                  + dmass_bark_darea_leaf(area_leaf, height, mass_sapwood)
                   + dmass_root_darea_leaf());
 }
 
 // TODO: Ordering below here needs working on, probably as @dfalster
 // does equation documentation?
-double ES20_Strategy::dheight_darea_leaf(double area_leaf) const {
-  return exp(log(area_leaf)/a_l2 - a_l1/a_l2) /(area_leaf * a_l2);
+double ES20_Strategy::dheight_darea_leaf(double area_leaf_, double height_) const {
+  const double adjustment = 2 / (1 + exp(-40 * (area_leaf_ - area_leaf(height_))));
+  return (exp(log(area_leaf_)/a_l2 - a_l1/a_l2) /(area_leaf_ * a_l2)) * adjustment;
 }
 
 // Mass of leaf needed for new unit area leaf, d m_s / d a_l
@@ -489,13 +488,14 @@ double ES20_Strategy::dmass_leaf_darea_leaf(double /* area_leaf */) const {
 }
 
 // Mass of stem needed for new unit area leaf, d m_s / d a_l
-double ES20_Strategy::dmass_sapwood_darea_leaf(double area_leaf, double height) const {
-  return rho * eta_c *theta * (height + area_leaf * dheight_darea_leaf(area_leaf));
+double ES20_Strategy::dmass_sapwood_darea_leaf(double area_leaf_, double height_, double mass_sapwood_) const {
+  const double adjustment = 2 / (1 + exp(-40 * (mass_sapwood_ - mass_sapwood(area_sapwood(area_leaf_), height_))));
+  return rho * eta_c *theta * (height_ + area_leaf_ * dheight_darea_leaf(area_leaf_, height_)) * adjustment;
 }
 
 // Mass of bark needed for new unit area leaf, d m_b / d a_l
-double ES20_Strategy::dmass_bark_darea_leaf(double area_leaf, double height) const {
-  return a_b1 * dmass_sapwood_darea_leaf(area_leaf, height);
+double ES20_Strategy::dmass_bark_darea_leaf(double area_leaf, double height, double mass_sapwood) const {
+  return a_b1 * dmass_sapwood_darea_leaf(area_leaf, height, mass_sapwood);
 }
 
 // Mass of root needed for new unit area leaf, d m_r / d a_l

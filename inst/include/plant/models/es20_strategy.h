@@ -154,20 +154,20 @@ public:
   double fecundity_dt(double mass_storage, double height) const;
   
   // [eqn 18] Fraction of mass growth that is leaves
-  double darea_leaf_dmass_live(double area_leaf, double height) const;
+  double darea_leaf_dmass_live(double area_leaf, double height, double mass_sapwood) const;
   
   
   
   double mass_leaf_dt(double area_leaf, double darea_leaf_dt_) const; 
   
   // change in height per change in leaf area
-  double dheight_darea_leaf(double area_leaf) const;
+  double dheight_darea_leaf(double area_leaf_, double height_) const;
   // Mass of leaf needed for new unit area leaf, d m_s / d a_l
   double dmass_leaf_darea_leaf(double area_leaf) const;
   // Mass of stem needed for new unit area leaf, d m_s / d a_l
-  double dmass_sapwood_darea_leaf(double area_leaf, double height) const;
+  double dmass_sapwood_darea_leaf(double area_leaf, double height, double mass_sapwood) const;
   // Mass of bark needed for new unit area leaf, d m_b / d a_l
-  double dmass_bark_darea_leaf(double area_leaf, double height) const;
+  double dmass_bark_darea_leaf(double area_leaf, double height, double mass_sapwood) const;
   // Mass of root needed for new unit area leaf, d m_r / d a_l
   double dmass_root_darea_leaf() const;
   // Growth rate of basal diameter_stem per unit stem area

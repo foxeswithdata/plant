@@ -1,6 +1,8 @@
 get_constant_environment_ES20 <- function(stress=1){
   ctrl <- equilibrium_verbose(fast_control())
-  ctrl$stress_regime <- rep(stress, times=3000)
+  stress_regime <- rep(stress, times=3000) + 1:3000 -1
+  
+  ctrl$stress_regime <- stress_regime
   ctrl$generate_stress <- FALSE
   
   env_es <- ES20_fixed_environment(1.0)

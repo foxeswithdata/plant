@@ -83,7 +83,10 @@ public:
   bool stressed() const {
     return false;
   }
-
+  
+  double getStress() const{
+    return 1;
+  }
   double k_I;
 };
 

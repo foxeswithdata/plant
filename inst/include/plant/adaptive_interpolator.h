@@ -95,6 +95,7 @@ bool AdaptiveInterpolator::refine(Function target) {
   dx /= 2;
 
   if (dx < dxmin) {
+    std::cout << "dx" << dx << "     dxmin      " << dxmin << std::endl;
     util::stop("Interpolated function as refined as currently possible");
   }
 

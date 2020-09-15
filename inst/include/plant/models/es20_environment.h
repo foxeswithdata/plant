@@ -28,6 +28,7 @@ public:
     seed_rain = { 1.0, 1.0, 1.0 };
     seed_rain_index = 3;
     k_I = 0.5;
+    k_s = 50;
     
   
     
@@ -58,6 +59,7 @@ public:
     
     
     k_I = k_I_;
+    k_s = 50;
     environment_generator = interpolator::AdaptiveInterpolator(control.environment_light_tol,
                                                                control.environment_light_tol,
                                                                control.environment_light_nbase,
@@ -128,6 +130,21 @@ public:
     }
   }
   
+  double getStress() const {
+    double yr = floor(time);
+    double yr_next = yr+1;
+    double tcrit = stress_regime[yr];
+    if(time < (yr + tcrit)/2){
+      return 1/(1 + exp(-k_s * (time - yr)));
+    }
+    else if(time < (tcrit+yr_next)/2){
+      return 1/(1 + exp(k_s * (time - tcrit)));
+    }
+    else{
+      return 1/(1 + exp(-k_s * (time - yr_next)));
+    }
+  }
+  
   void prepare_stress(){
     //erase stress as it exists
     stress_regime.erase(stress_regime.begin(),stress_regime.end());
@@ -139,7 +156,7 @@ public:
     
     //hard coded 3000 as an upper limit that will probably not be reached
     for (int i = 0; i < 3000; i++) {
-      stress_regime.push_back(d(stress_regime_engine));
+      stress_regime.push_back((d(stress_regime_engine) + i));
     }
   }
   
@@ -158,6 +175,8 @@ public:
   
   double stress_mean;
   double stress_sd;
+  
+  double k_s; // stress parameter
   
   std::vector<double> stress_regime;
   

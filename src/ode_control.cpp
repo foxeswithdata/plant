@@ -45,6 +45,8 @@ double OdeControl::adjust_step_size(size_t dim, size_t ord,
     step_size *= r;
     last_step_size_shrank = true;
     if (step_size < step_size_min) {
+      std::cout<< "Step size " << step_size <<std::endl;
+      std::cout<< "Step size_min " << step_size_min <<std::endl;
       step_size = step_size_min;
       util::stop("Step size became too small");
     }

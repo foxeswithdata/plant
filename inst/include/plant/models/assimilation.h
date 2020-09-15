@@ -47,9 +47,11 @@ class Assimilation {
     
     // Add the stress
     
-    if(environment.stressed()){
-      return 0;
-    }
+    // if(environment.stressed()){
+      // return 0;
+    // }
+    
+    double stress = environment.getStress();
 
     std::function<double(double)> f;
     if (over_distribution) {
@@ -65,12 +67,12 @@ class Assimilation {
     if (control.plant_assimilation_adaptive && reuse_intervals) {
       A = control.integrator.integrate_with_last_intervals(f, x_min, x_max);
     } else {
-      std::cout << "I"<<" height: "<< height<< " time: "<<environment.time<<std::endl;
+      // std::cout << "I"<<" height: "<< height<< " time: "<<environment.time<<std::endl;
       A = control.integrator.integrate(f, x_min, x_max);
-      std::cout << "O" << std::endl;
+      // std::cout << "O" << std::endl;
     }
 
-    return area_leaf * A;
+    return area_leaf * A * stress;
   }
 
   // This is used in the calculation of assimilation by
