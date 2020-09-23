@@ -22,3 +22,11 @@ plant::Internals K93_oderunner_plant_internals(
 }
 
 
+
+// [[Rcpp::export]]
+plant::Internals ES20_oderunner_plant_internals(
+  const plant::ode::Runner<plant::tools::IndividualRunner<plant::ES20_Strategy, plant::ES20_Environment>>& obj) {
+  return obj.obj.plant.r_internals();
+}
+
+

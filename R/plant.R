@@ -59,6 +59,84 @@ grow_plant_to_height <- function(plant, heights, env, ...) {
 }
 
 ##' Grow a plant up for particular time lengths
+##' Save auxilary data as well as state data
+##'
+##' @title Grow a plant
+##' @param plant A \code{Plant} object
+##' @param times A vector of times
+##' @param env An \code{Environment} object
+##' @export
+grow_plant_to_time_expanded <- function(plant, times, env) {
+  if (any(times < 0.0)) {
+    stop("Times must be positive")
+  }
+  n <- length(times)
+  if (n == 0L) {
+    stop("At least one time must be given")
+  }
+  
+  y0 <- plant$ode_state
+  t0 <- 0.0
+  i <- 1L
+  t_next <- times[[i]]
+  strategy_name <- plant$strategy_name
+  
+  pr1 <- IndividualRunner(strategy_name, sprintf("%s_Env", strategy_name))(plant, env)
+  pr2 <- IndividualRunner(strategy_name, sprintf("%s_Env", strategy_name))(plant, env)
+  
+  runner <- OdeRunner(strategy_name)(pr1)
+  runner_detail <- OdeRunner(strategy_name)(pr2)
+  
+  
+  ## TODO: This could also be done by better configuring the
+  ## underlying ODE runner, but this seems a reasonable way of getting
+  ## things run for now.
+  state <- matrix(NA, n, length(y0))
+  colnames(state) <- plant$ode_names
+  
+  
+  aux_size <- matrix(NA, n, plant$aux_size)
+  colnames(aux_size) <- plant$aux_names
+  
+  ## For the detailed runner outputs
+  state_detail <- matrix(NA, n, length(y0))
+  colnames(state_detail) <- plant$ode_names
+  
+  aux_size_detail <- matrix(NA, n, plant$aux_size)
+  colnames(aux_size_detail) <- plant$aux_names
+  
+  
+  
+  plant <- vector("list", n)
+  
+  while (i <= n) {
+    runner$step()
+    
+    t1 <- runner$time
+    y1 <- runner$state
+    
+    while (t_next < t1 && i <= n) {
+      runner_detail$set_state(y0, t0)
+      runner_detail$step_to(t_next)
+      state[i, ] <- runner_detail$state
+      plant[[i]] <- runner_detail$object$plant
+      aux <- sapply(runner_detail$object$plant$aux_names, function(x){
+        return(runner_detail$object$plant$aux(x))
+      })
+      aux_size[i, ] <- aux
+      i <- i + 1L
+      t_next <- times[i] # allows out-of-bounds extraction
+    }
+    t0 <- t1
+    y0 <- y1
+  }
+  
+  list(time=times, state=state, aux_size = aux_size, plant=plant, env=env)
+}
+
+
+
+##' Grow a plant up for particular time lengths
 ##'
 ##' @title Grow a plant
 ##' @param plant A \code{Plant} object

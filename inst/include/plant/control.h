@@ -70,6 +70,11 @@ struct Control {
   size_t equilibrium_nattempts;
   bool   equilibrium_solver_logN;
   bool   equilibrium_solver_try_keep;
+  
+  bool generate_stress;
+  double stress_mean;
+  double stress_sd;
+  std::vector<double> stress_regime;
 
   // Things derived from this:
   quadrature::QAG integrator;

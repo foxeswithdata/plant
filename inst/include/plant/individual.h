@@ -22,7 +22,7 @@ public:
       strategy->refresh_indices();
     }
     vars.resize(strategy_type::state_size(), s->aux_size()); // = Internals(strategy_type::state_size());
-    set_state("height", strategy->height_0);
+    s->initialize_states(vars);
   }
   
   // useage: state(HEIGHT_INDEX)
@@ -69,7 +69,8 @@ public:
 
   double net_mass_production_dt(const environment_type &environment) {
     // TODO:  maybe reuse intervals? default false 
-    return strategy->net_mass_production_dt(environment, state(HEIGHT_INDEX), aux("competition_effect"));
+    // should fix with a switch 
+    return strategy->net_mass_production_dt(environment, vars, aux("competition_effect"));
   }
 
   // * ODE interface

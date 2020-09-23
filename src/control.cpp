@@ -47,6 +47,11 @@ Control::Control() : integrator(15, 1, 0, 0) {
   equilibrium_nattempts = 5;
   equilibrium_solver_logN = true;
   equilibrium_solver_try_keep = true;
+  
+  generate_stress = true;
+  stress_mean = 0.75;
+  stress_sd = 0.0684931506849315;
+  
 }
 
 void Control::initialize() {

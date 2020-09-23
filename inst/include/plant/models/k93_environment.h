@@ -96,6 +96,15 @@ public:
   double canopy_openness(double height) const {
     return get_environment_at_height(height);
   }
+  
+  bool stressed() const {
+    return false;
+  }
+  
+  double getStress() const {
+    return 1;
+  }
+  
 };
 
 inline Rcpp::NumericMatrix get_state(const K93_Environment environment) {

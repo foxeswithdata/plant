@@ -47,6 +47,10 @@ public:
   double net_mass_production_dt(const K93_Environment& environment,
                                 double size, double cumulative_basal_area,
                                 bool reuse_intervals=false);
+  
+  double net_mass_production_dt(const K93_Environment& environment,
+                                const Internals& vars,
+                                bool reuse_intervals);
 
   double Q(double z, double size) const;
 
@@ -100,6 +104,9 @@ public:
 
   // Set constants within K93_Strategy
   void prepare_strategy();
+  
+  // Initialize all relevant states
+  void initialize_states(Internals& vars);
 
   std::string name;
 };

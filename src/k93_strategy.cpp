@@ -63,6 +63,11 @@ double K93_Strategy::net_mass_production_dt(const K93_Environment& environment,
                                             bool reuse_intervals) {
 }
 
+double K93_Strategy::net_mass_production_dt(const K93_Environment& environment,
+                                            const Internals& vars,
+                                            bool reuse_intervals) {
+}
+
 void K93_Strategy::refresh_indices () {
   // Create and fill the name to state index maps
   state_index = std::map<std::string,int>();
@@ -147,6 +152,10 @@ double K93_Strategy::mortality_dt(double cumulative_basal_area,
 void K93_Strategy::prepare_strategy() {
   // Set up the integrator
   control.initialize();
+}
+
+void K93_Strategy::initialize_states(Internals &vars){
+  vars.set_state(state_index.at("height"), height_0);
 }
 
 K93_Strategy::ptr make_strategy_ptr(K93_Strategy s) {

@@ -123,6 +123,10 @@ public:
   double net_mass_production_dt(const Water_Environment& environment,
                                 double height, double area_leaf_,
                                 bool reuse_intervals=false);
+  
+  double net_mass_production_dt(const Water_Environment& environment,
+                                const Internals& vars,
+                                bool reuse_intervals=false);
 
   // [eqn 16] Fraction of whole plan growth that is leaf
   double fraction_allocation_reproduction(double height) const;
@@ -189,6 +193,9 @@ public:
 
   // Set constants within Water_Strategy
   void prepare_strategy();
+  
+  // Initialize all relevant states
+  void initialize_states(Internals& vars);
 
   // Previously there was an "integrator" here.  I'm going to stick
   // that into Control or Water_Environment instead.

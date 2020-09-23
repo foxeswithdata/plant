@@ -304,6 +304,15 @@ double Water_Strategy::net_mass_production_dt(const Water_Environment& environme
   return net_mass_production_dt_A(assimilation_, respiration_, turnover_);
 }
 
+double Water_Strategy::net_mass_production_dt(const Water_Environment& environment,
+                                              const Internals& vars,
+                                              bool reuse_intervals) {
+  
+  const double height = vars.state(HEIGHT_INDEX);
+  const double area_leaf_ = vars.aux(aux_index.at("competition_effect"));
+  return(net_mass_production_dt(environment, height, area_leaf_, reuse_intervals));
+}
+
 // [eqn 16] Fraction of production allocated to reproduction
 double Water_Strategy::fraction_allocation_reproduction(double height) const {
   return a_f1 / (1.0 + exp(a_f2 * (1.0 - height / hmat)));
@@ -524,6 +533,10 @@ void Water_Strategy::prepare_strategy() {
   // NOTE: Also pre-computing, though less trivial
   height_0 = height_seed();
   area_leaf_0 = area_leaf(height_0);
+}
+
+void Water_Strategy::initialize_states(Internals &vars){
+  vars.set_state(state_index.at("height"), height_0);
 }
 
 Water_Strategy::ptr make_strategy_ptr(Water_Strategy s) {

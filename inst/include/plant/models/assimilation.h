@@ -38,6 +38,10 @@ class Assimilation {
 
     double A = 0.0;
 
+    // Find the stress
+    double stress = environment.getStress();
+    
+    
     std::function<double(double)> f;
     if (over_distribution) {
       f = [&] (double x) -> double {
@@ -55,7 +59,7 @@ class Assimilation {
       A = control.integrator.integrate(f, x_min, x_max);
     }
 
-    return area_leaf * A;
+    return area_leaf * A * stress;
   }
 
   // This is used in the calculation of assimilation by

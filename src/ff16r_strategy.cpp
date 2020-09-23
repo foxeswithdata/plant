@@ -302,6 +302,15 @@ double FF16r_Strategy::net_mass_production_dt(const FF16r_Environment& environme
   return net_mass_production_dt_A(assimilation_, respiration_, turnover_);
 }
 
+double FF16r_Strategy::net_mass_production_dt(const FF16r_Environment& environment,
+                                              const Internals& vars,
+                                              bool reuse_intervals) {
+  
+  const double height = vars.state(HEIGHT_INDEX);
+  const double area_leaf_ = vars.aux(aux_index.at("competition_effect"));
+  return(net_mass_production_dt(environment, height, area_leaf_, reuse_intervals));
+}
+
 // [eqn 16] Fraction of production allocated to reproduction
 double FF16r_Strategy::fraction_allocation_reproduction(double height) const {
   if(height <= hmat)
@@ -525,6 +534,10 @@ void FF16r_Strategy::prepare_strategy() {
   // NOTE: Also pre-computing, though less trivial
   height_0 = height_seed();
   area_leaf_0 = area_leaf(height_0);
+}
+
+void FF16r_Strategy::initialize_states(Internals &vars){
+  vars.set_state(state_index.at("height"), height_0);
 }
 
 FF16r_Strategy::ptr make_strategy_ptr(FF16r_Strategy s) {
