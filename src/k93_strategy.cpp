@@ -156,6 +156,7 @@ void K93_Strategy::prepare_strategy() {
 
 void K93_Strategy::initialize_states(Internals &vars){
   vars.set_state(state_index.at("height"), height_0);
+  update_dependent_aux(HEIGHT_INDEX, vars);
 }
 
 K93_Strategy::ptr make_strategy_ptr(K93_Strategy s) {

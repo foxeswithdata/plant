@@ -533,7 +533,8 @@ void FF16_Strategy::prepare_strategy() {
 }
 
 void FF16_Strategy::initialize_states(Internals &vars){
-  vars.set_state(state_index.at("height"), height_0);
+  vars.set_state(HEIGHT_INDEX, height_0);
+  update_dependent_aux(HEIGHT_INDEX, vars);
 }
 
 FF16_Strategy::ptr make_strategy_ptr(FF16_Strategy s) {

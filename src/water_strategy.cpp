@@ -537,6 +537,7 @@ void Water_Strategy::prepare_strategy() {
 
 void Water_Strategy::initialize_states(Internals &vars){
   vars.set_state(state_index.at("height"), height_0);
+  update_dependent_aux(HEIGHT_INDEX, vars);
 }
 
 Water_Strategy::ptr make_strategy_ptr(Water_Strategy s) {
