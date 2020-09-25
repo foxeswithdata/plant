@@ -114,14 +114,6 @@ public:
     return get_environment_at_height(height);
   }
   
-  bool stressed() const {
-    return false;
-  }
-  
-  double getStress() const {
-    return 1;
-  }
-  
 
   double k_I;
   double inflow_rate;

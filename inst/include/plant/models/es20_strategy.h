@@ -4,12 +4,9 @@
 #define PLANT_PLANT_ES20_STRATEGY_H_
 
 #include <memory>
-#include <plant/control.h>
-#include <plant/qag_internals.h> // quadrature::intervals_type
-#include <plant/internals.h> // quadrature::intervals_type
 #include <plant/strategy.h>
 #include <plant/models/es20_environment.h>
-#include <plant/models/assimilation.h>
+#include <plant/models/es20_assimilation.h>
 
 namespace plant {
 
@@ -302,7 +299,7 @@ public:
 
   std::string name;
 
-  Assimilation<ES20_Environment> assimilator;
+  ES20_Assimilation assimilator;
 
   
 };
