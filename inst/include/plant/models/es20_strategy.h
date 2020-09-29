@@ -161,7 +161,8 @@ public:
                                 bool reuse_intervals=false);
 
   // [eqn 17] Rate of offspring production
-  double fecundity_dt(double mass_storage, double height) const;
+  double fecundity_dt(double net_mass_production_dt,
+                      double fraction_allocation_reproduction) const;
 
   // [eqn 18] Fraction of mass growth that is leaves
   double darea_leaf_dmass_live(double area_leaf, double height, double mass_sapwood) const;

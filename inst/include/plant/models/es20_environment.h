@@ -36,9 +36,9 @@ public:
     k_s = 50;
     stress_mean = 0.75;
     stress_sd = 0.0684931506849315;
-    
+    // 
     prepare_stress();
-    
+
     
   };
 
@@ -67,6 +67,10 @@ public:
     k_s = 50;
     stress_mean = control.stress_mean;
     stress_sd = control.stress_sd;
+    // 
+    k_s = 50;
+    stress_mean = 0.75;
+    stress_sd = 0.0684931506849315;
     
     if(control.generate_stress || control.stress_regime.empty()){
       prepare_stress();
@@ -126,7 +130,6 @@ public:
   }
   
   bool stressed() const {
-    
     double yr = floor(time);
     if(time_in_year() < stress_regime[yr]){
       return false;
@@ -155,27 +158,27 @@ public:
     //erase stress as it exists
     stress_regime.erase(stress_regime.begin(),stress_regime.end());
     std::default_random_engine stress_regime_engine;
-    
+
     // values near the mean are the most likely
     // standard deviation affects the dispersion of generated values from the mean
     std::normal_distribution<double> d(stress_mean,stress_sd);
-    
+
     //hard coded 3000 as an upper limit that will probably not be reached
     for (int i = 0; i < 3000; i++) {
       stress_regime.push_back((d(stress_regime_engine) + i));
     }
   }
-  
+
   void reset_stress_random(double new_mean=0.684931506849315, double new_sd=0.0684931506849315){
     stress_mean = new_mean;
     stress_sd = new_sd;
     prepare_stress();
   }
-  
+
   void reset_stress(std::vector<double> new_stress_regime){
     stress_regime = new_stress_regime;
   }
-  
+
   double stress_mean;
   double stress_sd;
   double k_s; // stress parameter

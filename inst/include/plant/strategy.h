@@ -49,7 +49,7 @@ public:
   void update_dependent_aux(const int index, Internals& vars);
 
   double net_mass_production_dt(const environment_type& environment,
-                                double size, double competition_effect_,
+                                Internals& vars,
                                 bool reuse_intervals=false);
 
   double establishment_probability(const environment_type& environment);

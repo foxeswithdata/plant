@@ -1,4 +1,4 @@
-# rm(list=ls())
+rm(list=ls())
 
 devtools::load_all()
 # source("scripts/ES20/test_objects.R")
@@ -9,13 +9,12 @@ devtools::load_all()
 # Look at FF16 (Code example)
 
 p0 <- scm_base_parameters("FF16")
-p0$control$equilibrium_nsteps <- 30
-p0$control$equilibrium_solver_name <- "hybrid"
-p0$control$equilibrium_verbose <- TRUE
-p0$disturbance_mean_interval <- 30.0
+# p0$control$equilibrium_nsteps <- 30
+# p0$control$equilibrium_solver_name <- "hybrid"
+# p0$control$equilibrium_verbose <- TRUE
+# p0$disturbance_mean_interval <- 30.0
 
-p1 <- expand_parameters(trait_matrix(0.0825, "lma"), p0)
-# p1$is_resident <- TRUE
+p1 <- expand_parameters(trait_matrix(0.0825, "lma"), p0, mutant=FALSE)
 
 # why is this not working?
 
@@ -112,7 +111,7 @@ p0$control$equilibrium_nsteps <- 30
 p0$control$stress_sd <- 0
 p0$control$generate_stress <- TRUE
 p0$control$equilibrium_solver_name <- "iteration"
-p0$disturbance_mean_interval <- 30.0
+p0$disturbance_mean_interval <- 3.0
 
 p1 <- expand_parameters(trait_matrix(c(0.4, 21.9,0.4, 0.1), c("t_s", "a_s", "height_0", "b_s")), p0, FALSE)
 

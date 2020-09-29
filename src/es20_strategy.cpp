@@ -188,9 +188,9 @@ double ES20_Strategy::mass_above_ground(double mass_leaf, double mass_bark,
 
 // for updating auxillary state
 void ES20_Strategy::update_dependent_aux(const int index, Internals& vars) {
-  if (index == HEIGHT_INDEX) {
-    double height = vars.state(HEIGHT_INDEX);
-    vars.set_aux(aux_index.at("competition_effect"), area_leaf(height));
+  if (index == AREA_LEAF_INDEX) {
+    double area_leaf= vars.state(AREA_LEAF_INDEX);
+    vars.set_aux(aux_index.at("competition_effect"), area_leaf);
   }
 }
 
@@ -215,8 +215,6 @@ double ES20_Strategy::dmass_storage_dt(double net_mass_production_dt_, double db
 void ES20_Strategy::compute_rates(const ES20_Environment& environment,
                               bool reuse_intervals,
                               Internals& vars) {
-
-  // std::cout << "TIME: "<< environment.time << std::endl;
   
   double height = vars.state(HEIGHT_INDEX);
   double area_leaf_ = vars.state(AREA_LEAF_INDEX);
@@ -238,8 +236,7 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
   // std::cout << "storage 1: " << mass_storage_ << std::endl;
   
   const double net_mass_production_dt_ =
-    net_mass_production_dt(environment, height, area_leaf_, mass_leaf_, mass_sapwood_,
-                           mass_bark_, mass_root_, reuse_intervals);
+    net_mass_production_dt(environment, vars, reuse_intervals);
   
   // std::cout << "A : " << net_mass_production_dt_ << std::endl;
   
@@ -456,7 +453,9 @@ double ES20_Strategy::net_mass_production_dt(const ES20_Environment& environment
   return net_mass_production_dt_A(assimilation_, respiration_);
 }
 
-double ES20_Strategy::net_mass_production_dt(const ES20_Environment& environment, const Internals& vars, bool reuse_intervals) {
+double ES20_Strategy::net_mass_production_dt(const ES20_Environment& environment, 
+                                             const Internals& vars, 
+                                             bool reuse_intervals) {
   double height = vars.state(HEIGHT_INDEX);
   double area_leaf_ = vars.state(AREA_LEAF_INDEX);
   double mass_leaf_ = vars.state(MASS_LEAF_INDEX);
@@ -468,7 +467,10 @@ double ES20_Strategy::net_mass_production_dt(const ES20_Environment& environment
 }
 
 // [eqn 17] Rate of offspring production
-double ES20_Strategy::fecundity_dt(double mass_storage, double height) const {
+double ES20_Strategy::fecundity_dt(double net_mass_production_dt,
+                                   double fraction_allocation_reproduction) const {
+  double mass_storage = net_mass_production_dt;
+  double height = fraction_allocation_reproduction;
   return mass_storage * a_f1 / ((omega + a_f3) * (1.0 + exp(a_f2 * (1.0 - height / hmat))));
 }
 
@@ -656,7 +658,8 @@ double ES20_Strategy::mortality_growth_dependent_dt(double storage_portion) cons
 // [eqn 20] Survival of seedlings during establishment
 double ES20_Strategy::establishment_probability(const ES20_Environment& environment) {
   const double net_mass_production_dt_ =
-    net_mass_production_dt(environment, height_0, area_leaf_0);
+    net_mass_production_dt(environment, height_0, area_leaf_0, mass_leaf_0, mass_sapwood_0,
+                           mass_bark_0, mass_root_0);
   if (net_mass_production_dt_ > 0) {
     const double tmp = a_d0 * area_leaf_0 / net_mass_production_dt_;
     return 1.0 / (tmp * tmp + 1.0);
@@ -682,10 +685,10 @@ double ES20_Strategy::Q(double z, double height) const {
 // The aim is to find a plant height that gives the correct seed mass.
 double ES20_Strategy::height_seed(void) const {
   
-  if(height_0 == height_0){
-    // std::cout << "height is" << height_0 <<std::endl;
-    return height_0;
-  }
+  // if(height_0 == height_0){
+  //   // std::cout << "height is" << height_0 <<std::endl;
+  //   return height_0;
+  // }
 
   // Note, these are not entirely correct bounds. Ideally we would use height
   // given *total* mass, not leaf mass, but that is difficult to calculate.
@@ -739,6 +742,8 @@ void ES20_Strategy::initialize_states(Internals &vars){
   vars.set_state(state_index.at("area_stem"), area_stem_0);
   vars.set_state(state_index.at("mass_storage"), mass_storage_0);
   vars.set_state(state_index.at("diameter_stem"), diameter_stem_0);
+  update_dependent_aux(AREA_LEAF_INDEX, vars);
+  
 }
 
 ES20_Strategy::ptr make_strategy_ptr(ES20_Strategy s) {
