@@ -54,7 +54,7 @@ public:
 
   double Q(double z, double size) const;
 
-  double compute_competition(double z, double size) const;
+  double compute_competition(double z, const Internals& vars) const;
 
   void update_dependent_aux(const int index, Internals& vars);
 

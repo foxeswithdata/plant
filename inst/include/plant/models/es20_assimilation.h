@@ -8,6 +8,8 @@
 #include <plant/control.h>
 #include <plant/qag.h> // quadrature::intervals_type
 
+#include <iostream>
+
 namespace plant {
 
 class ES20_Assimilation: public Assimilation<ES20_Environment> {
@@ -32,6 +34,10 @@ public:
 
     // Find the stress
     double stress = environment.getStress();
+    
+    // std::cout << "TIME:   " << environment.time << std::endl;
+    // std::cout << "leaf area:  " << area_leaf << "  height:   " << height << "  stress:    " << stress << std::endl;
+
 
 
     std::function<double(double)> f;
@@ -53,9 +59,9 @@ public:
 
     return area_leaf * A * stress;
   }
-  
+
 };
-  
+
 } // namespace plant
 
 #endif

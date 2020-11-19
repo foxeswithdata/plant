@@ -10,6 +10,9 @@ gc()
 setwd("~/R/plant") 
 # library(deSolve)
 library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
 
 # Use latest version 
 RcppR6::install(".")
@@ -21,77 +24,98 @@ source('scripts/ES20/test_objects.R')
 ##PREPARE PLANTS 
 
 # Non-stressed plant
-
-env_ns <- get_constant_environment_ES20()
-pl_ns <- get_non_stressed_plant_ES20()
+# 
+# env_ns <- get_constant_environment_ES20()
+# pl_ns <- get_non_stressed_plant_ES20()
 
 
 # Normal regular stressed plant
 
-p0_es <- scm_base_parameters("ES20")
-p0_es$disturbance_mean_interval <- 30.0
+# p0_es <- scm_base_parameters("ES20")
+# p0_es$disturbance_mean_interval <- 30.0
+# 
+# 
+# 
+# p1_es <- expand_parameters(trait_matrix(c(0.045, 21.6, 0.02, 2), c("t_s", "a_s", "b_s", "height_0")), p0_es, mutant=FALSE)
+
+species_list <- data.frame(a_s = c(0.10, 0.10, 0.30, 0.30)*365, t_s = c(0.66, 0.33, 0.66, 0.33))
+
+p0 <- scm_base_parameters("ES20")
+p0$control <- get_random_environment(p0$control, ceiling(p0$cohort_schedule_max_time), 0.75, 30/365)
+p0$disturbance_mean_interval <- 10.0
+p0$patch_area <- 1
+
+p1 <- expand_parameters(trait_matrix(c(species_list$t_s[1], species_list$a_s[1], 0.1), c("t_s", "a_s","omega")), p0, mutant=FALSE)
 
 
-p1_es <- expand_parameters(trait_matrix(c(0.60, 21.9, 0.2, 0.12423, 505, 16.5958691, 0.01), c("t_s", "a_s", "height_0", "lma", "rho", "hmat", "a_f1")), p0_es)
-
-pl_1_es <- ES20_Individual(s = p1_es$strategies[[1]])
+pl_1_es <- ES20_Individual(s = p1$strategies[[1]])
 
 pl_es <- pl_1_es # ES20_Plant()
-env_es <- ES20_fixed_environment(1.0)
+# env_es <- ES20_fixed_environment(1.0)
+env_es <- p1$environment
 
 # FF16 plant 
 
-p0_ff <- scm_base_parameters("FF16")
-p0_ff$disturbance_mean_interval <- 30.0
+# p0_ff <- scm_base_parameters("FF16")
+# p0_ff$disturbance_mean_interval <- 30.0
 
 
-p1_ff <- expand_parameters(trait_matrix(c(0.1242302, 505), c("lma", "rho")), p0_ff)
+# p1_ff <- expand_parameters(trait_matrix(c(0.1242302, 505), c("lma", "rho")), p0_ff)
+# 
+# pl_1_ff <- FF16_Individual(s = p1_ff$strategies[[1]])
 
-pl_1_ff <- FF16_Individual(s = p1_ff$strategies[[1]])
-
-pl_ff <- pl_1_ff # ES20_Plant()
-env_ff <- FF16_fixed_environment(1.0)
+# pl_ff <- pl_1_ff # ES20_Plant()
+# env_ff <- FF16_fixed_environment(1.0)
 
 
 # SINGLE YEAR TESTS
-tt <- seq(0, 25, length.out=100)
-
+tt <- seq(0, 5, length.out=50)
+ 
 
 # Run single year
-res_ns <- grow_plant_to_time_expanded(pl_ns, tt, env_ns)
+# res_ns <- grow_plant_to_time_expanded(pl_ns, tt, env_ns)
 res_es <- grow_plant_to_time_expanded(pl_es, tt, env_es)
-res_ff <- grow_plant_to_time_expanded(pl_ff, tt, env_ff)
+# res_ff <- grow_plant_to_time_expanded(pl_ff, tt, env_ff)
 
 
-res_ns_df <- as.data.frame(res_ns$state)
+# p1_es <- expand_parameters(trait_matrix(c(0.195, 21.6, 0.02, 1.5), c("t_s", "a_s", "b_s1", "height_0")), p0_es, mutant=FALSE)
+# p1_es_2 <- expand_parameters(trait_matrix(c(ts_values[k], 21.9, h_0_values[i], b_s_values[j]), c("t_s", "a_s", "height_0", "b_s1")), p0_es, mutant=FALSE)
+# pl_1_es <- ES20_Individual(s = p1_es_2$strategies[[1]])
+# pl_es <- pl_1_es # ES20_Plant()
+# env_es <- get_constant_environment_ES20(stress=0.75)
+# tt <- seq(0, 1.1, length.out=50)
+# res_es <- grow_plant_to_time_expanded(pl_es, tt, env_es)
+
+
+# res_ns_df <- as.data.frame(res_ns$state)
 res_es_df <- as.data.frame(res_es$state)
-res_ff_df <- as.data.frame(res_ff$state)
+# res_ff_df <- as.data.frame(res_ff$state)
 
 
-res_ns_df <- cbind(res_ns_df, res_ns$aux_size)
+# res_ns_df <- cbind(res_ns_df, res_ns$aux_size)
 res_es_df <- cbind(res_es_df, res_es$aux_size)
 
 
-res_ff_df <- cbind(res_ff_df, res_ff$aux_size)
+# res_ff_df <- cbind(res_ff_df, res_ff$aux_size)
 
 # Fix the leaf area in original model 
-colnames(res_ff_df)[colnames(res_ff_df) %in% c("competition_effect")] <- "area_leaf"
+# colnames(res_ff_df)[colnames(res_ff_df) %in% c("competition_effect")] <- "area_leaf"
 
 
 
-res_ns_df$model <- rep("NS", times=nrow(res_ns_df))
+# res_ns_df$model <- rep("NS", times=nrow(res_ns_df))
 res_es_df$model <- rep("ES", times=nrow(res_es_df))
-res_ff_df$model <- rep("FF", times=nrow(res_ff_df))
+# res_ff_df$model <- rep("FF", times=nrow(res_ff_df))
 
-res_ns_df$time <- tt
+# res_ns_df$time <- tt
 res_es_df$time <- tt
-res_ff_df$time <- tt
+# res_ff_df$time <- tt
 
 
 res_mass_long_es <- pivot_longer(res_es_df, 
                                  c('mass_leaf', 'mass_sapwood', 'mass_heartwood', 'mass_bark', 'mass_storage', 'mass_root'), names_to = "mass_type", values_to = "mass_value" )
-res_mass_long_ns <- pivot_longer(res_ns_df,
-                                 c('mass_leaf', 'mass_sapwood', 'mass_heartwood', 'mass_bark', 'mass_storage', 'mass_root'), names_to = "mass_type", values_to = "mass_value" )
+# res_mass_long_ns <- pivot_longer(res_ns_df,
+                                 # c('mass_leaf', 'mass_sapwood', 'mass_heartwood', 'mass_bark', 'mass_storage', 'mass_root'), names_to = "mass_type", values_to = "mass_value" )
 
 
 rates_mass_long_es <- pivot_longer(res_es_df, 
@@ -129,14 +153,14 @@ percent_hd <- res_mass_long_es  %>%
 res_all <- rbind(res_ns_df, res_es_df)
 res_all <- plyr::rbind.fill(res_all, res_ff_df)
 
-# res_all <- res_es_df
+res_all <- res_es_df
 # Plot some results
 
 ## Firstly height
 
 p <- ggplot(res_all, aes(x = time, y = height)) + 
   geom_line(aes(color = model)) +
-  geom_hline(yintercept = pl_1_es$strategy$hmat, linetype = "dashed") +
+  # geom_hline(yintercept = pl_1_es$strategy$hmat, linetype = "dashed") +
   scale_x_continuous(name = "Time (yr)") +
   scale_y_continuous(name = "Plant Height (m)") + 
   theme_linedraw()
@@ -144,48 +168,48 @@ p
 
 ## adjustments
 
-p <- ggplot(res_all, aes(x = time, y = height_adjustment)) + 
+p <- ggplot(res_all, aes(x = time, y = height_adjustment)) +
   geom_line(aes(color = model)) +
   scale_x_continuous(name = "Time (yr)") +
-  scale_y_continuous(name = "Plant Height Adjustment (m)") + 
+  scale_y_continuous(name = "Plant Height Adjustment (m)") +
   theme_linedraw()
 p
 
-p <- ggplot(res_all, aes(x = time, y = mass_sapwood_adjustment)) + 
-  geom_line(aes(color = model)) +
-  scale_x_continuous(name = "Time (yr)") +
-  scale_y_continuous(name = "Plant Height (m)") + 
-  theme_linedraw()
-p
-
-p <- ggplot(res_all, aes(x = time, y = mass_sapwood_difference)) + 
-  geom_line(aes(color = model)) +
-  scale_x_continuous(name = "Time (yr)") +
-  scale_y_continuous(name = "Plant Height (m)") + 
-  theme_linedraw()
-p
-
-p <- ggplot(res_all, aes(x = time, y = height_difference)) + 
-  geom_line(aes(color = model)) +
-  scale_x_continuous(name = "Time (yr)") +
-  scale_y_continuous(name = "Plant Height (m)") + 
-  theme_linedraw()
-p
-
-p <- ggplot(res_all, aes(x = mass_sapwood_difference, y = mass_sapwood_adjustment)) + 
-  geom_point(aes(color = model)) +
-  scale_x_continuous(name = "Time (yr)", limit = c(-2.5, 0)) +
-  scale_y_continuous(name = "Plant Height (m)") + 
-  theme_linedraw()
-p
-
-p <- ggplot(res_all, aes(x = time, y = fecundity_dt_abs * (pl_1_es$strategy$omega + pl_1_es$strategy$a_f3))) + 
-  geom_line(aes(color = model)) +
-  geom_line(aes(y = mass_storage)) +
-  scale_x_continuous(name = "Time (yr)") +
-  scale_y_continuous(name = "Plant Height Adjustment (m)") + 
-  theme_linedraw()
-p
+# p <- ggplot(res_all, aes(x = time, y = mass_sapwood_adjustment)) + 
+#   geom_line(aes(color = model)) +
+#   scale_x_continuous(name = "Time (yr)") +
+#   scale_y_continuous(name = "Plant Height (m)") + 
+#   theme_linedraw()
+# p
+# 
+# p <- ggplot(res_all, aes(x = time, y = mass_sapwood_difference)) + 
+#   geom_line(aes(color = model)) +
+#   scale_x_continuous(name = "Time (yr)") +
+#   scale_y_continuous(name = "Plant Height (m)") + 
+#   theme_linedraw()
+# p
+# 
+# p <- ggplot(res_all, aes(x = time, y = height_difference)) + 
+#   geom_line(aes(color = model)) +
+#   scale_x_continuous(name = "Time (yr)") +
+#   scale_y_continuous(name = "Plant Height (m)") + 
+#   theme_linedraw()
+# p
+# 
+# p <- ggplot(res_all, aes(x = mass_sapwood_difference, y = mass_sapwood_adjustment)) + 
+#   geom_point(aes(color = model)) +
+#   scale_x_continuous(name = "Time (yr)", limit = c(-2.5, 0)) +
+#   scale_y_continuous(name = "Plant Height (m)") + 
+#   theme_linedraw()
+# p
+# 
+# p <- ggplot(res_all, aes(x = time, y = fecundity_dt_abs * (pl_1_es$strategy$omega + pl_1_es$strategy$a_f3))) + 
+#   geom_line(aes(color = model)) +
+#   geom_line(aes(y = mass_storage)) +
+#   scale_x_continuous(name = "Time (yr)") +
+#   scale_y_continuous(name = "Plant Height Adjustment (m)") + 
+#   theme_linedraw()
+# p
 
 ## Now the storage mass and proportion (should be on same graph at a later stage)
 
@@ -199,9 +223,17 @@ p <- ggplot(res_all, aes(x = time)) +
 p
 
 p <- ggplot(res_all, aes(x = time)) + 
-  geom_line(aes(y = (mass_storage/(mass_sapwood+mass_leaf+mass_bark+mass_root + mass_storage)), color=model), linetype = "dashed") +
+  geom_line(aes(y = (storage_portion), color=model), linetype = "dashed") +
   scale_x_continuous(name = "Time (yr)") +
   scale_y_continuous(name = "Storage Concentration")+
+  theme_linedraw()
+p
+
+
+p <- ggplot(res_all, aes(x = time)) + 
+  geom_line(aes(y = (mass_sapwood), color=model)) +
+  scale_x_continuous(name = "Time (yr)") +
+  scale_y_continuous(name = "Sapwood Mass kgC")+
   theme_linedraw()
 p
 
@@ -220,31 +252,31 @@ p
 
 
 
-p <- ggplot(res_all, aes(x = time, y = net_mass_production_dt + respiration_dt)) + 
+p <- ggplot(res_all, aes(x = time, y = net_mass_production_dt + respiration_dt, linetype=model)) + 
   geom_line() +
-  geom_line(aes(y = area_leaf), linetype = "dashed", color = "blue") +
-  geom_line(aes(y = mass_sapwood), linetype ="dashed", color = "green") +
-  geom_line(aes(y = respiration_dt), linetype = "dashed", color = "red") +
+  geom_line(aes(y = area_leaf, linetype = model), color = "blue") +
+  geom_line(aes(y = mass_sapwood, linetype =model), color = "green") +
+  geom_line(aes(y = respiration_dt,linetype = model), color = "red") +
   # geom_line(aes(y = net_mass_production_dt), linetype = "dashed", color="blue") +
-  scale_x_continuous(name = "Time (yr)", limit = c(0,10)) +
+  # scale_x_continuous(name = "Time (yr)", limit = c(0,10)) +
   scale_y_continuous(name = "GPP (kgCyr-1)") + 
   theme_linedraw()
 
 p
 
 
-p <- ggplot(res_all, aes(x = time, y = dbiomass_dt)) + 
+p <- ggplot(res_all, aes(x = time, y = dbiomass_dt, color = model)) + 
   geom_line() +
-  scale_x_continuous(name = "Time (yr)", limit = c(11, 13)) +
+  scale_x_continuous(name = "Time (yr)", limits = c(15, 20)) +
   scale_y_continuous(name = "dBiomass_dt") + 
   theme_linedraw()
 p
 
 
-p <- ggplot(res_all, aes(x = time, y = dmass_leaf_darea_leaf)) + 
+p <- ggplot(res_all, aes(x = time, y = dmass_leaf_darea_leaf, linetype=model)) + 
   geom_line() +
   scale_x_continuous(name = "Time (yr)") +
-  scale_y_continuous(name = "dBiomass_dt") + 
+  scale_y_continuous(name = "dmass_leaf_darea_leaf") + 
   theme_linedraw()
 p
 
@@ -255,7 +287,7 @@ max(growth_rates_mass_long_es_2$mass_value)
 
 p <- ggplot(growth_rates_mass_long_es_2, aes(x = time, y = mass_value, fill = mass_type)) + 
   geom_area(alpha=0.5) + 
-  scale_x_continuous(name = "Time (yr)", limit = c(0, 10)) +
+  scale_x_continuous(name = "Time (yr)") +
   scale_y_continuous(name = "Proportion Allocation") + 
   theme_linedraw()
 p
@@ -271,7 +303,7 @@ res_mass_long_es_sub <- subset(res_mass_long_es, mass_type != "mass_storage")
 
 p <- ggplot(res_mass_long_es_sub, aes(x = time, y = mass_value, fill = mass_type)) + 
   geom_area(alpha=0.5) + 
-  scale_x_continuous(name = "Time (yr)", limit=c(0,10)) +
+  scale_x_continuous(name = "Time (yr)") +
   scale_y_continuous(name = "Plant Mass Pools kgC") + 
   theme_linedraw()
 p
@@ -312,7 +344,7 @@ p
 
 p <- ggplot(res_all, aes(x=time, y = area_leaf, color = model)) + 
   geom_line() + 
-  scale_x_continuous(name = "Time (yr)") +
+  scale_x_continuous(name = "Time (yr)", breaks = 0:20) +
   scale_y_continuous(name = "Leaf Area (m2)") + 
   theme_linedraw()
 p
@@ -346,7 +378,7 @@ p
 
 
 
-p <- ggplot(res_es_df, aes(x=time, y = mortality, color = model)) + 
+p <- ggplot(res_all, aes(x=time, y = mortality, linetype = model)) + 
   geom_line() + 
   scale_x_continuous(name = "Time (yr)") +
   scale_y_continuous(name = "Mortality (yr^-1)")+ 
@@ -354,8 +386,8 @@ p <- ggplot(res_es_df, aes(x=time, y = mortality, color = model)) +
 p
 
 
-p <- ggplot(res_es_df, aes(x=mass_storage/(mass_sapwood+mass_leaf+mass_bark+mass_root), y = mortality, color = model)) + 
-  geom_point() + 
+p <- ggplot(res_es_df, aes(x=storage_portion, y = mortality)) + 
+  geom_point(aes(color = time)) + 
   scale_x_continuous(name = "Storage Proportion") +
   scale_y_continuous(name = "Mortality (yr^-1)")+ 
   theme_linedraw()
@@ -379,7 +411,7 @@ p <- ggplot(res_all, aes(x=time, y = diameter_stem, color = model)) +
 p
 
 
-p <- ggplot(res_all, aes(x=height, y = diameter_stem, color = model)) + 
+p <- ggplot(res_all, aes(x=height, y = diameter_stem, shape = model, color = model)) + 
   geom_point() + 
   scale_x_continuous(name = "Height (m)") +
   scale_y_continuous(name = "Diameter (m)") + 

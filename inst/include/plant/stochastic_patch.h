@@ -2,6 +2,8 @@
 #ifndef PLANT_PLANT_STOCHASTIC_PATCH_H_
 #define PLANT_PLANT_STOCHASTIC_PATCH_H_
 
+#include <iostream>
+
 namespace plant {
 
 // NOTE: compute_environment() here might fail (especially for
@@ -20,7 +22,7 @@ public:
   typedef Individual<T,E>             individual_type;
   typedef StochasticSpecies<T,E> species_type;
   typedef Parameters<T,E>        parameters_type;
-  StochasticPatch(parameters_type p);
+  StochasticPatch(parameters_type p);    
   void reset();
 
   size_t size() const {return species.size();}
@@ -121,6 +123,7 @@ template <typename T, typename E>
 double StochasticPatch<T,E>::compute_competition(double height) const {
   double tot = 0.0;
   for (size_t i = 0; i < species.size(); ++i) {
+    std::cout << "Species " << i << "      Height: " << height <<  std::endl;
     if (is_resident[i]) {
       tot += species[i].compute_competition(height);
     }
@@ -130,6 +133,7 @@ double StochasticPatch<T,E>::compute_competition(double height) const {
 
 template <typename T, typename E>
 void StochasticPatch<T,E>::compute_environment() {
+  std::cout << "Compute the Environment" << std::endl;
   if (parameters.n_residents() > 0 & height_max() > 0.0) {
     auto f = [&] (double x) -> double {return compute_competition(x);};
     environment.compute_environment(f, height_max());
@@ -140,6 +144,7 @@ void StochasticPatch<T,E>::compute_environment() {
 
 template <typename T, typename E>
 void StochasticPatch<T,E>::rescale_environment() {
+  std::cout << "Rescaling the Environment" << std::endl;
   if (parameters.n_residents() > 0 & height_max() > 0.0) {
     auto f = [&] (double x) -> double {return compute_competition(x);};
     environment.rescale_environment(f, height_max());

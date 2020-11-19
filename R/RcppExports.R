@@ -3313,6 +3313,14 @@ ES20_Environment__stressed <- function(obj_) {
     .Call('_plant_ES20_Environment__stressed', PACKAGE = 'plant', obj_)
 }
 
+ES20_Environment__getStress <- function(obj_) {
+    .Call('_plant_ES20_Environment__getStress', PACKAGE = 'plant', obj_)
+}
+
+ES20_Environment__getStress_at_time <- function(obj_, t) {
+    .Call('_plant_ES20_Environment__getStress_at_time', PACKAGE = 'plant', obj_, t)
+}
+
 ES20_Environment__reset_stress_random <- function(obj_, new_mean, new_sd) {
     invisible(.Call('_plant_ES20_Environment__reset_stress_random', PACKAGE = 'plant', obj_, new_mean, new_sd))
 }

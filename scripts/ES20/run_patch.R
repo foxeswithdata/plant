@@ -9,25 +9,38 @@ devtools::load_all()
 # Look at FF16 (Code example)
 
 p0 <- scm_base_parameters("FF16")
+p0$patch_area <- 1
 # p0$control$equilibrium_nsteps <- 30
 # p0$control$equilibrium_solver_name <- "hybrid"
 # p0$control$equilibrium_verbose <- TRUE
 # p0$disturbance_mean_interval <- 30.0
 
-p1 <- expand_parameters(trait_matrix(0.0825, "lma"), p0, mutant=FALSE)
+
+p1 <- expand_parameters(trait_matrix(c(0.1242302, 0.1), c("lma", "omega")), p0, mutant=FALSE)
+p1 <- expand_parameters(trait_matrix(c(0.1242304, 0.1), c("lma", "omega")), p1, mutant=FALSE)
+p1 <- expand_parameters(trait_matrix(c(0.1242306, 0.1), c("lma", "omega")), p1, mutant=FALSE)
+p1 <- expand_parameters(trait_matrix(c(0.1242308, 0.1), c("lma", "omega")), p1, mutant=FALSE)
 
 # why is this not working?
 
 p1_eq <- equilibrium_seed_rain(p1)
 
 
-p1$seed_rain <- 20
+p1_eq$seed_rain
+
+scm <-  FF16_SCM(p1)
+
+
+for(i in 1:length(p1$cohort_schedule_times_default)){
+  cat(i)
+  scm$run_next()
+}
 
 p1_eq$seed_rain
 
 # p1$seed_rain <- 3.0
 
-data1 <- run_scm_collect(p1)
+data1 <- run_scm_collect(p1_eq)
 
 # Plot (from github instructions)
 
@@ -107,22 +120,31 @@ matlines(t2, h2, lty=1, col=make_transparent(cols[[2]], .25))
 ## Look at ES20
 
 p0 <- scm_base_parameters("ES20")
-p0$control$equilibrium_nsteps <- 30
-p0$control$stress_sd <- 0
-p0$control$generate_stress <- TRUE
-p0$control$equilibrium_solver_name <- "iteration"
-p0$disturbance_mean_interval <- 3.0
+p0$disturbance_mean_interval <- 30.0
 
-p1 <- expand_parameters(trait_matrix(c(0.4, 21.9,0.4, 0.1), c("t_s", "a_s", "height_0", "b_s")), p0, FALSE)
+p1 <- expand_parameters(trait_matrix(c(0.66, 0.30 * 365, 0.1), c("t_s", "a_s", "omega")), p0, mutant=FALSE)
+
+# p1$cohort_schedule_max_time
+# p1$cohort_schedule_times_default
+# p1$cohort_schedule_times_default[82]
+
+
+
+p1_eq <- equilibrium_seed_rain(p1)
+
+p1_eq$seed_rain
 
 p1$seed_rain <- 20
 scm <-  ES20_SCM(p1)
 
 
-for(i in 1:150){
+for(i in 1:length(p1$cohort_schedule_times_default)){
   cat(i)
   scm$run_next()
 }
+
+scm$time
+
 
 scm$patch$environment$environment_interpolator$xy
 
@@ -150,10 +172,9 @@ scm$
 ode_times_after <- scm$ode_times
 length(ode_times_after)
 
+p1$seed_rain
 
-# p1_eq <- equilibrium_seed_rain(p1)
-
-data1 <- run_scm_collect(p1_eq)
+data1 <- run_scm_collect(p1)
 
 
 

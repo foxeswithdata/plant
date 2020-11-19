@@ -7,6 +7,8 @@
 #include <plant/environment.h>
 #include <plant/ode_interface.h>
 
+#include <iostream>
+
 namespace plant {
 
 // This is for running the stochastic model.
@@ -152,6 +154,7 @@ double StochasticSpecies<T,E>::height_max() const {
 template <typename T, typename E>
 double StochasticSpecies<T,E>::compute_competition(double height) const {
   if (size() == 0 || height_max() < height) {
+    std::cout << "no species or shorter than max" <<std::endl;
     return 0.0;
   }
   double tot = 0.0;
@@ -160,6 +163,7 @@ double StochasticSpecies<T,E>::compute_competition(double height) const {
   for (size_t i = 0; i < size_plants(); ++i) {
     if (is_alive[i]) {
       if (plants[i].state(HEIGHT_INDEX) > height) {
+        // std::cout << "Plant " << i;
         tot += plants[i].compute_competition(height);
       } else {
         break;
@@ -202,7 +206,9 @@ size_t StochasticSpecies<T,E>::deaths() {
   size_t died = 0;
   for (size_t i = 0; i < size_plants(); ++i) {
     if (is_alive[i]) {
+      std::cout << "Mortality Plant " << i <<" ";
       if (unif_rand() < plants[i].mortality_probability()) {
+        std::cout << "  died  " << std::endl;
         is_alive[i] = false;
         died++;
       } else {

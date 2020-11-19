@@ -28,6 +28,9 @@ void AdaptiveInterpolator::check_bounds(double a, double b) {
 bool AdaptiveInterpolator::check_err(double y_true, double y_pred) const {
   const double err_abs = fabs(y_true - y_pred);
   const double err_rel = fabs(1 - y_pred / y_true);
+  // std::cout << "Check error:   " << y_true << "   versus pred   " << y_pred << 
+  //   "  err_abs  " << err_abs << "  err_rel  " << err_rel << "  " << 
+  //     (err_abs < atol) << " OR " << (err_rel < rtol) << std::endl;
   return err_abs < atol || err_rel < rtol;
 }
 

@@ -6,6 +6,8 @@
 #include <plant/gradient.h>
 #include <plant/ode_interface.h>
 
+#include <iostream>
+
 namespace plant {
 
 template <typename T, typename E>
@@ -83,9 +85,17 @@ void Cohort<T,E>::compute_rates(const environment_type& environment) {
 
   // NOTE: This must be called *after* compute_rates, but given we
   // need mortality_dt() that's always going to be the case.
+  
+  const double grg = growth_rate_gradient(environment);
+  const double mortality = plant.rate("mortality");
+  // std::cout<< "growth rate gradient: " << grg << std::endl;
+  // std::cout<< "mortality: " << mortality << std::endl;
+    
   log_density_dt =
-    - growth_rate_gradient(environment)
+    - grg
     - plant.rate("mortality");
+    
+  
 
   // survival_plant: converts from the mean of the poisson process (on
   // [0,Inf)) to a probability (on [0,1]).

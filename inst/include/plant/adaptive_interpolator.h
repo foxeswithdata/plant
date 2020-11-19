@@ -6,6 +6,8 @@
 #include <plant/interpolator.h>
 #include <plant/util.h> // util::stop, util::seq_len
 
+#include <iostream>
+
 namespace plant {
 namespace interpolator {
 
@@ -60,6 +62,9 @@ private:
 template <typename Function>
 Interpolator AdaptiveInterpolator::construct(Function target,
                                              double a, double b) {
+  
+  std::cout << "Construct adaptive interpolator    " << std::endl;
+  
   check_bounds(a, b);
   dx = (b - a) / (static_cast<int>(nbase) - 1);
   dxmin = dx / pow(2, max_depth);
@@ -92,10 +97,17 @@ Interpolator AdaptiveInterpolator::construct(Function target,
 // further refinement.
 template <typename Function>
 bool AdaptiveInterpolator::refine(Function target) {
+  
   dx /= 2;
+  
+  
+  std::cout << "Refine adaptive interpolator    " << "dx(new)  " <<  dx << "  dxmin   " << dxmin << std::endl;
+  
+  bool final_test = FALSE;
 
   if (dx < dxmin) {
     util::stop("Interpolated function as refined as currently possible");
+    final_test = TRUE;
   }
 
   bool flag = false;
@@ -113,7 +125,8 @@ bool AdaptiveInterpolator::refine(Function target) {
       yy.insert(yi, y_mid);
 
       // Flag for refinement based on
-      const bool flag_mid = !check_err(y_mid, p_mid);
+      const bool flag_mid = !check_err(y_mid, p_mid) && !final_test;
+      
       // If error was OK/not OK (flag_mid is true/false), say that
       // this interval is OK/not OK...
       *zi = flag_mid;

@@ -9234,6 +9234,29 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// ES20_Environment__getStress
+double ES20_Environment__getStress(plant::RcppR6::RcppR6<plant::ES20_Environment> obj_);
+RcppExport SEXP _plant_ES20_Environment__getStress(SEXP obj_SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< plant::RcppR6::RcppR6<plant::ES20_Environment> >::type obj_(obj_SEXP);
+    rcpp_result_gen = Rcpp::wrap(ES20_Environment__getStress(obj_));
+    return rcpp_result_gen;
+END_RCPP
+}
+// ES20_Environment__getStress_at_time
+double ES20_Environment__getStress_at_time(plant::RcppR6::RcppR6<plant::ES20_Environment> obj_, double t);
+RcppExport SEXP _plant_ES20_Environment__getStress_at_time(SEXP obj_SEXP, SEXP tSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< plant::RcppR6::RcppR6<plant::ES20_Environment> >::type obj_(obj_SEXP);
+    Rcpp::traits::input_parameter< double >::type t(tSEXP);
+    rcpp_result_gen = Rcpp::wrap(ES20_Environment__getStress_at_time(obj_, t));
+    return rcpp_result_gen;
+END_RCPP
+}
 // ES20_Environment__reset_stress_random
 void ES20_Environment__reset_stress_random(plant::RcppR6::RcppR6<plant::ES20_Environment> obj_, double new_mean, double new_sd);
 RcppExport SEXP _plant_ES20_Environment__reset_stress_random(SEXP obj_SEXP, SEXP new_meanSEXP, SEXP new_sdSEXP) {
@@ -10531,6 +10554,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_plant_ES20_Environment__set_fixed_environment", (DL_FUNC) &_plant_ES20_Environment__set_fixed_environment, 3},
     {"_plant_ES20_Environment__time_in_year", (DL_FUNC) &_plant_ES20_Environment__time_in_year, 1},
     {"_plant_ES20_Environment__stressed", (DL_FUNC) &_plant_ES20_Environment__stressed, 1},
+    {"_plant_ES20_Environment__getStress", (DL_FUNC) &_plant_ES20_Environment__getStress, 1},
+    {"_plant_ES20_Environment__getStress_at_time", (DL_FUNC) &_plant_ES20_Environment__getStress_at_time, 2},
     {"_plant_ES20_Environment__reset_stress_random", (DL_FUNC) &_plant_ES20_Environment__reset_stress_random, 3},
     {"_plant_ES20_Environment__reset_stress", (DL_FUNC) &_plant_ES20_Environment__reset_stress, 2},
     {"_plant_ES20_Environment__patch_survival__get", (DL_FUNC) &_plant_ES20_Environment__patch_survival__get, 1},

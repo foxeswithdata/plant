@@ -1,5 +1,6 @@
 // Built from  src/ff16_strategy.cpp on Wed Sep 16 07:11:11 2020 using the scaffolder, from the strategy:  FF16
 #include <plant/models/es20_strategy.h>
+#include <iostream>
 
 namespace plant {
 
@@ -12,7 +13,7 @@ ES20_Strategy::ES20_Strategy() {
   lma       = 0.1242302;  // Leaf mass per area [kg / m2]
   rho       = 505.0;      // Wood density [kg/m3]
   hmat      = 30; //16.5958691; // Height at maturation [m]
-  omega     = 3.8e-5;     // Seed mass [kg]
+  omega     = 0.001;//3.8e-5 * 3;     // Seed mass [kg]
 
   // * Individual allometry
   // Canopy shape parameter (extra calculation here later)
@@ -28,7 +29,7 @@ ES20_Strategy::ES20_Strategy() {
   // Root mass per leaf area
   a_r1        = 0.027691;  //[kg / m]
   // Ratio of bark area : sapwood area
-  a_b1         = 0.17; // [dimensionless]
+  a_b1         = 0.3768273; // [dimensionless]
 
   // * Production
   // Ratio of leaf dark respiration to leaf mass [mol CO2 / yr  / kg]
@@ -42,7 +43,7 @@ ES20_Strategy::ES20_Strategy() {
   // Sapwood respiration per stem mass  [mol CO2 / yr / kg]
   // = respiration per volume [mol CO2 / m3 / yr]
   // /  wood density [kg/m3]
-  r_s   = 4012.0 / 608.0;
+  r_s   = 2.412504;
   // Bark respiration per stem mass
   // assumed to be twice rate of sapwood
   // (NOTE that there is a re-parametrisation here relative to the paper
@@ -63,7 +64,7 @@ ES20_Strategy::ES20_Strategy() {
   // Root turnover [/yr]
   k_r    = 1.0;
   // Parameters of the hyperbola for annual LRC
-  a_p1   = 151.177775377968/0.75; // [mol CO2 / yr / m2]
+  a_p1   = 151.177775377968; // [mol CO2 / yr / m2]
   a_p2   = 0.204716166503633; // [dimensionless]
 
   // * Seed production
@@ -71,7 +72,7 @@ ES20_Strategy::ES20_Strategy() {
   a_f3  = 3.0 *  3.8e-5; // [kg per seed]
 
   // Maximum allocation to reproduction
-  a_f1   = 0.05; //[dimensionless]
+  a_f1   = 0.10; //[dimensionless]
   // Size range across which individuals mature
   a_f2   = 50; // [dimensionless]
 
@@ -82,8 +83,13 @@ ES20_Strategy::ES20_Strategy() {
   a_d0    = 0.1; //[kg / yr / m2]
   // Baseline for intrinsic mortality
   d_I    = 0.01; // [ / yr]
- // Baseline rate for growth-related mortality
-  a_dG1    = 5.5; // [ / yr]
+ // Baseline rate for storage-related mortality
+  a_dS1    = 3; // [ / yr]
+  // Risk coefficient for dry mass production (per area)
+  a_dS2    = 300.0;// [yr m2 / kg ]
+  
+  // Baseline rate for growth-related mortality
+  a_dG1    = 3; // [ / yr]
   // Risk coefficient for dry mass production (per area)
   a_dG2    = 20.0;// [yr m2 / kg ]
 
@@ -93,7 +99,8 @@ ES20_Strategy::ES20_Strategy() {
   a_s = 0.06 * 365;
   // time of switch [yr]
   t_s = 0.4109589;
-  b_s = 0.1;
+  b_s1 = 0.1;
+  b_s2 = 120;
   
   // Will get computed properly by prepare_strategy
   height_0 = NA_REAL;
@@ -197,18 +204,43 @@ void ES20_Strategy::update_dependent_aux(const int index, Internals& vars) {
 
 double ES20_Strategy::dbiomass_dt(const ES20_Environment& environment, 
                                   double mass_storage) const {
-  if (environment.time_in_year() < t_s && mass_storage > 0){
-    return mass_storage * a_s;
+  if (mass_storage > 0){
+    double yr = floor(environment.time);
+    double yr_next = yr+1;
+    
+    // if(time < (yr + (t_s/2))){
+    //   return ((a_s)/(1 + exp(-b_s2 * (time - yr))));
+    // }
+    // else if(time < (yr + t_s + ((1-t_s))/2)){
+    //   return ((a_s)/(1 + exp(b_s2 * (time - (t_s+yr)))));
+    // }
+    // else{
+    //   return ((a_s)/(1 + exp(-b_s2 * (time - yr_next))));
+    // }
+    
+    
+    if(environment.time < (yr + (t_s/2))){
+      return (a_s * mass_storage)/(1 + exp(-b_s2 * (environment.time - yr)));
+    }
+    else if(environment.time < (yr + t_s + ((1-t_s)/2))){
+      return (a_s * mass_storage)/(1 + exp(b_s2 * (environment.time - (t_s+yr))));
+    }
+    else{
+      return (a_s * mass_storage)/(1 + exp(-b_s2 * (environment.time - yr_next)));
+    }
   }
-  else {
-    return 0;
-  }
+  return 0;
 }
 
 double ES20_Strategy::dmass_storage_dt(double net_mass_production_dt_, double dbiomass_dt_) const {
   return net_mass_production_dt_ - dbiomass_dt_;
 }
 
+double ES20_Strategy::storage_portion(double mass_storage, double mass_leaf, double mass_bark, double mass_sapwood,
+                       double mass_root) const {
+  return mass_storage / (mass_live(mass_leaf, mass_bark, mass_sapwood, mass_root));
+  
+}
 
 // one-shot update of the scm variables
 // i.e. setting rates of ode vars from the state and updating aux vars
@@ -227,9 +259,17 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
   double mass_root_ = vars.state(MASS_ROOT_INDEX);
   double mass_storage_ = vars.state(MASS_STORAGE_INDEX);
   
-  if(area_leaf_ < 0){
-    area_leaf_ = 0.000001;
-    vars.set_state(state_index.at("area_leaf"), 0);
+  
+  
+  if(area_leaf_ <= 0){
+    area_leaf_ = 0.0001;
+    vars.set_state(state_index.at("area_leaf"), area_leaf_);
+  }
+  
+  if(mass_storage_ < 0){
+    vars.set_aux(aux_index.at("dead_flag"), 1);
+    // mass_storage_ = 0;
+    // vars.set_state(state_index.at("mass_storage"), mass_storage_);
   }
   
   // std::cout << "area_leaf: " << area_leaf_ << std::endl;
@@ -242,12 +282,14 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
   
   const double dbiomass_dt_ = dbiomass_dt(environment, mass_storage_);
   double dmass_storage_dt_  = dmass_storage_dt(net_mass_production_dt_, dbiomass_dt_);
+  const double storage_portion_ = storage_portion(mass_storage_, mass_leaf_, mass_bark_, mass_sapwood_, mass_root_);
   // 
   // std::cout << "storage 2: " << mass_storage_ << " rate: " << dmass_storage_dt_ << std::endl;
   
   // store the aux sate
   vars.set_aux(aux_index.at("net_mass_production_dt"), net_mass_production_dt_);
   vars.set_aux(aux_index.at("dbiomass_dt"), dbiomass_dt_);
+  vars.set_aux(aux_index.at("storage_portion"), storage_portion_);
   vars.set_aux(aux_index.at("respiration_leaf_dt"), a_bio * a_y * respiration_leaf(mass_leaf_,environment));
   vars.set_aux(aux_index.at("respiration_bark_dt"), a_bio * a_y * respiration_bark(mass_bark_,environment));
   vars.set_aux(aux_index.at("respiration_root_dt"), a_bio * a_y * respiration_root(mass_root_,environment));
@@ -263,9 +305,10 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
   vars.set_aux(aux_index.at("mass_sapwood_adjustment"), mass_sapwood_area_leaf_allometry_adjustment(area_leaf_, height, mass_sapwood_));
   
   // std::cout << "net bio: "<< dbiomass_dt_ << std::endl;
-  
+  // 
   if (dbiomass_dt_ > 0) {
     
+    // std::cout<< "height " << height << "   leaf area    " << area_leaf_ << std::endl;
     const double dheight_darea_leaf_ = dheight_darea_leaf(area_leaf_, height);
     vars.set_aux(aux_index.at("dheight_darea_leaf"), dheight_darea_leaf_);
     
@@ -275,8 +318,11 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
     const double darea_leaf_dt_ = darea_leaf_dmass_live_ * dbiomass_dt_;
     const double dmass_leaf_dt_ = mass_leaf_dt(area_leaf_, darea_leaf_dt_);
     
+    // std::cout<< "ddarea_leaf_dt " << darea_leaf_dt_ <<std::endl;
     
     const double dheight_dt_ = dheight_darea_leaf_ * darea_leaf_dt_;
+    
+    // std::cout<< "dheight_dt  " << dheight_dt_ <<std::endl;
     
     vars.set_aux(aux_index.at("darea_leaf_dmass_live"), darea_leaf_dmass_live_);
     vars.set_aux(aux_index.at("darea_leaf_dt"), darea_leaf_dt_);
@@ -360,7 +406,13 @@ void ES20_Strategy::compute_rates(const ES20_Environment& environment,
   // [eqn 21] - Instantaneous mortality rate
   vars.set_rate(MASS_STORAGE_INDEX, dmass_storage_dt_);
   vars.set_rate(MORTALITY_INDEX,
-                mortality_dt(mass_storage_ / mass_live(mass_leaf_, mass_bark_, mass_sapwood_, mass_root_), vars.state(MORTALITY_INDEX)));
+                mortality_dt(storage_portion_, net_mass_production_dt_ / area_leaf_, environment, vars.state(MORTALITY_INDEX)));
+  
+  vars.set_aux(aux_index.at("mortality_storage_dependent_dt"), mortality_storage_dependent_dt(storage_portion_));
+  vars.set_aux(aux_index.at("mortality_growth_dependent_dt"), mortality_growth_dependent_dt(net_mass_production_dt_ / area_leaf_, environment));
+  vars.set_aux(aux_index.at("productivity_area"), net_mass_production_dt_ / area_leaf_);
+  vars.set_aux(aux_index.at("stress"), environment.getStress());
+  
   
   // std::cout<< "Finished compute rates "<< std::endl;
 }
@@ -379,31 +431,24 @@ double ES20_Strategy::respiration(double mass_leaf, double mass_sapwood,
 }
 
 double ES20_Strategy::respiration_leaf(double mass, const ES20_Environment& environment) const {
-  if (environment.stressed()){
-    return (r_l/2) * mass;
-  }
-  return r_l * mass;
+  const double stress = environment.getStress();
+  // std::cout<< "Stress respiration : " << (0.5 + stress/2) ;
+  return r_l * mass * (0.5 + stress/2);
 }
 
 double ES20_Strategy::respiration_bark(double mass, const ES20_Environment& environment) const {
-  if (environment.stressed()){
-    return (r_b/2) * mass;
-  }
-  return r_b * mass;
+  const double stress = environment.getStress();
+  return r_b * mass * (0.5 + stress/2);
 }
 
 double ES20_Strategy::respiration_sapwood(double mass, const ES20_Environment& environment) const {
-  if (environment.stressed()){
-    return (r_s/2) * mass;
-  }
-  return r_s * mass;
+  const double stress = environment.getStress();
+  return r_s * mass * (0.5 + stress/2);
 }
 
 double ES20_Strategy::respiration_root(double mass, const ES20_Environment& environment) const {
-  if (environment.stressed()){
-    return (r_r/2) * mass;
-  }
-  return r_r * mass;
+  const double stress = environment.getStress();
+  return r_r * mass * (0.5 + stress/2);
 }
 
 
@@ -626,6 +671,8 @@ double ES20_Strategy::height_given_mass_leaf(double mass_leaf) const {
 }
 
 double ES20_Strategy::mortality_dt(double storage_portion,
+                                   double productivity_area,
+                                   const ES20_Environment& environment,
                                    double cumulative_mortality) const {
   
   // NOTE: When plants are extremely inviable, the rate of change in
@@ -637,8 +684,9 @@ double ES20_Strategy::mortality_dt(double storage_portion,
   // now, just checking that the actual mortality rate is finite.
   if (R_FINITE(cumulative_mortality)) {
     return
-    mortality_growth_independent_dt() +
-      mortality_growth_dependent_dt(storage_portion);
+      mortality_growth_independent_dt() +
+      mortality_storage_dependent_dt(storage_portion) +
+      mortality_growth_dependent_dt(productivity_area, environment);
   } else {
     // If mortality probability is 1 (latency = Inf) then the rate
     // calculations break.  Setting them to zero gives the correct
@@ -651,8 +699,14 @@ double ES20_Strategy::mortality_growth_independent_dt() const {
   return d_I;
 }
 
-double ES20_Strategy::mortality_growth_dependent_dt(double storage_portion) const {
-  return a_dG1 * exp(-a_dG2 * storage_portion);
+double ES20_Strategy::mortality_storage_dependent_dt(double storage_portion) const {
+  return a_dS1 * exp(-a_dS2 * storage_portion);
+}
+
+double ES20_Strategy::mortality_growth_dependent_dt(double productivity_area, const ES20_Environment& environment) const{
+  //when stressed mortality is purely dependent on storage 
+  const double stress = environment.getStress();
+  return stress * a_dG1 * exp(-a_dG2 * productivity_area);
 }
 
 // [eqn 20] Survival of seedlings during establishment
@@ -668,8 +722,9 @@ double ES20_Strategy::establishment_probability(const ES20_Environment& environm
   }
 }
 
-double ES20_Strategy::area_leaf_above(double z, double height) const {
-  return area_leaf(height) * Q(z, height);
+double ES20_Strategy::area_leaf_above(double z, double height, double area_leaf) const {
+  // std::cout << "In Strategy . " << "Leaf area " << area_leaf << "   Q    " <<  Q(z, height) << "   final values:   " << area_leaf * Q(z, height) <<std::endl;
+  return area_leaf * Q(z, height);
 }
 
 // [eqn 10] ... Fraction of leaf area above height 'z' for an
@@ -685,10 +740,11 @@ double ES20_Strategy::Q(double z, double height) const {
 // The aim is to find a plant height that gives the correct seed mass.
 double ES20_Strategy::height_seed(void) const {
   
-  // if(height_0 == height_0){
-  //   // std::cout << "height is" << height_0 <<std::endl;
-  //   return height_0;
-  // }
+  
+  // If height is preset then use that as a start
+  if(height_0 == height_0){
+    return height_0;
+  }
 
   // Note, these are not entirely correct bounds. Ideally we would use height
   // given *total* mass, not leaf mass, but that is difficult to calculate.
@@ -726,7 +782,7 @@ void ES20_Strategy::prepare_strategy() {
   mass_bark_0 = mass_bark(area_bark_0, height_0);
   mass_root_0 = mass_root(area_leaf_0);
   area_stem_0 = area_stem(area_bark_0, area_sapwood_0, 0); 
-  mass_storage_0 = b_s * mass_live(mass_leaf_0, mass_bark_0, mass_sapwood_0, mass_root_0);
+  mass_storage_0 = b_s1 * mass_live(mass_leaf_0, mass_bark_0, mass_sapwood_0, mass_root_0);
   diameter_stem_0 = diameter_stem(area_stem_0);
 }
 

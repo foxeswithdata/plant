@@ -8,6 +8,8 @@
 #include <plant/internals.h>
 #include <plant/uniroot.h>
 
+#include <iostream>
+
 
 namespace plant {
 
@@ -55,7 +57,7 @@ public:
   double aux(int i) const { return vars.aux(i); } 
 
   double compute_competition(double z) const {
-    return strategy->compute_competition(z, state(HEIGHT_INDEX)); // aux("competition_effect"));
+    return strategy->compute_competition(z, vars); // aux("competition_effect"));
   }
 
   void compute_rates(const environment_type &environment,
@@ -103,7 +105,10 @@ public:
   // Single individual methods
 
   // Used in the stochastic model:
-  double mortality_probability() const { return 1 - exp(-state(MORTALITY_INDEX)); }
+  double mortality_probability() const { 
+    std::cout << (1 - exp(-state(MORTALITY_INDEX)));
+    return 1 - exp(-state(MORTALITY_INDEX)); 
+    }
   
   void reset_mortality() { set_state("mortality", 0.0); }
 

@@ -396,6 +396,7 @@ Parameters:
     - seed_rain: "std::vector<double>"
     - is_resident: "std::vector<bool>"
     - control: "plant::Control"
+    - environment: "E"
     - strategy_default: "T"
     - cohort_schedule_max_time: double
     - cohort_schedule_times_default: "std::vector<double>"
@@ -1014,7 +1015,7 @@ ES20_Strategy:
     - a_dG2: double
     - t_s: double 
     - a_s: double
-    - b_s: double
+    - b_s1: double
     - height_0: double
     - control: "plant::Control" 
     - collect_all_auxillary: bool
@@ -1052,6 +1053,11 @@ ES20_Environment:
       return_type: double
     stressed: 
       return_type: bool
+    getStress:
+      return_type: double
+    getStress_at_time:
+      args: [t: double]
+      return_type: double
     reset_stress_random:
       args: [new_mean: double, new_sd: double]
       return_type: void

@@ -53,8 +53,8 @@ public:
     /* return area_leaf_state(vars); */
   /* } */
 
-  double compute_competition(double z, double height) const {
-    return area_leaf_above(z, height);
+  double compute_competition(double z, const Internals& vars) const {
+    return area_leaf_above(z, vars.state(HEIGHT_INDEX));
   }
 
 

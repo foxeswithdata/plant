@@ -588,6 +588,7 @@ template <> inline SEXP wrap(const plant::Parameters<plant::FF16_Strategy,plant:
   ret["seed_rain"] = Rcpp::wrap(x.seed_rain);
   ret["is_resident"] = Rcpp::wrap(x.is_resident);
   ret["control"] = Rcpp::wrap(x.control);
+  ret["environment"] = Rcpp::wrap(x.environment);
   ret["strategy_default"] = Rcpp::wrap(x.strategy_default);
   ret["cohort_schedule_max_time"] = Rcpp::wrap(x.cohort_schedule_max_time);
   ret["cohort_schedule_times_default"] = Rcpp::wrap(x.cohort_schedule_times_default);
@@ -621,6 +622,8 @@ template <> inline plant::Parameters<plant::FF16_Strategy,plant::FF16_Environmen
   ret.is_resident = Rcpp::as<std::vector<bool> >(xl["is_resident"]);
   // ret.control = Rcpp::as<decltype(retcontrol) >(xl["control"]);
   ret.control = Rcpp::as<plant::Control >(xl["control"]);
+  // ret.environment = Rcpp::as<decltype(retenvironment) >(xl["environment"]);
+  ret.environment = Rcpp::as<plant::FF16_Environment >(xl["environment"]);
   // ret.strategy_default = Rcpp::as<decltype(retstrategy_default) >(xl["strategy_default"]);
   ret.strategy_default = Rcpp::as<plant::FF16_Strategy >(xl["strategy_default"]);
   // ret.cohort_schedule_max_time = Rcpp::as<decltype(retcohort_schedule_max_time) >(xl["cohort_schedule_max_time"]);
@@ -645,6 +648,7 @@ template <> inline SEXP wrap(const plant::Parameters<plant::ES20_Strategy,plant:
   ret["seed_rain"] = Rcpp::wrap(x.seed_rain);
   ret["is_resident"] = Rcpp::wrap(x.is_resident);
   ret["control"] = Rcpp::wrap(x.control);
+  ret["environment"] = Rcpp::wrap(x.environment);
   ret["strategy_default"] = Rcpp::wrap(x.strategy_default);
   ret["cohort_schedule_max_time"] = Rcpp::wrap(x.cohort_schedule_max_time);
   ret["cohort_schedule_times_default"] = Rcpp::wrap(x.cohort_schedule_times_default);
@@ -678,6 +682,8 @@ template <> inline plant::Parameters<plant::ES20_Strategy,plant::ES20_Environmen
   ret.is_resident = Rcpp::as<std::vector<bool> >(xl["is_resident"]);
   // ret.control = Rcpp::as<decltype(retcontrol) >(xl["control"]);
   ret.control = Rcpp::as<plant::Control >(xl["control"]);
+  // ret.environment = Rcpp::as<decltype(retenvironment) >(xl["environment"]);
+  ret.environment = Rcpp::as<plant::ES20_Environment >(xl["environment"]);
   // ret.strategy_default = Rcpp::as<decltype(retstrategy_default) >(xl["strategy_default"]);
   ret.strategy_default = Rcpp::as<plant::ES20_Strategy >(xl["strategy_default"]);
   // ret.cohort_schedule_max_time = Rcpp::as<decltype(retcohort_schedule_max_time) >(xl["cohort_schedule_max_time"]);
@@ -702,6 +708,7 @@ template <> inline SEXP wrap(const plant::Parameters<plant::FF16r_Strategy,plant
   ret["seed_rain"] = Rcpp::wrap(x.seed_rain);
   ret["is_resident"] = Rcpp::wrap(x.is_resident);
   ret["control"] = Rcpp::wrap(x.control);
+  ret["environment"] = Rcpp::wrap(x.environment);
   ret["strategy_default"] = Rcpp::wrap(x.strategy_default);
   ret["cohort_schedule_max_time"] = Rcpp::wrap(x.cohort_schedule_max_time);
   ret["cohort_schedule_times_default"] = Rcpp::wrap(x.cohort_schedule_times_default);
@@ -735,6 +742,8 @@ template <> inline plant::Parameters<plant::FF16r_Strategy,plant::FF16r_Environm
   ret.is_resident = Rcpp::as<std::vector<bool> >(xl["is_resident"]);
   // ret.control = Rcpp::as<decltype(retcontrol) >(xl["control"]);
   ret.control = Rcpp::as<plant::Control >(xl["control"]);
+  // ret.environment = Rcpp::as<decltype(retenvironment) >(xl["environment"]);
+  ret.environment = Rcpp::as<plant::FF16r_Environment >(xl["environment"]);
   // ret.strategy_default = Rcpp::as<decltype(retstrategy_default) >(xl["strategy_default"]);
   ret.strategy_default = Rcpp::as<plant::FF16r_Strategy >(xl["strategy_default"]);
   // ret.cohort_schedule_max_time = Rcpp::as<decltype(retcohort_schedule_max_time) >(xl["cohort_schedule_max_time"]);
@@ -759,6 +768,7 @@ template <> inline SEXP wrap(const plant::Parameters<plant::K93_Strategy,plant::
   ret["seed_rain"] = Rcpp::wrap(x.seed_rain);
   ret["is_resident"] = Rcpp::wrap(x.is_resident);
   ret["control"] = Rcpp::wrap(x.control);
+  ret["environment"] = Rcpp::wrap(x.environment);
   ret["strategy_default"] = Rcpp::wrap(x.strategy_default);
   ret["cohort_schedule_max_time"] = Rcpp::wrap(x.cohort_schedule_max_time);
   ret["cohort_schedule_times_default"] = Rcpp::wrap(x.cohort_schedule_times_default);
@@ -792,6 +802,8 @@ template <> inline plant::Parameters<plant::K93_Strategy,plant::K93_Environment>
   ret.is_resident = Rcpp::as<std::vector<bool> >(xl["is_resident"]);
   // ret.control = Rcpp::as<decltype(retcontrol) >(xl["control"]);
   ret.control = Rcpp::as<plant::Control >(xl["control"]);
+  // ret.environment = Rcpp::as<decltype(retenvironment) >(xl["environment"]);
+  ret.environment = Rcpp::as<plant::K93_Environment >(xl["environment"]);
   // ret.strategy_default = Rcpp::as<decltype(retstrategy_default) >(xl["strategy_default"]);
   ret.strategy_default = Rcpp::as<plant::K93_Strategy >(xl["strategy_default"]);
   // ret.cohort_schedule_max_time = Rcpp::as<decltype(retcohort_schedule_max_time) >(xl["cohort_schedule_max_time"]);
@@ -1316,7 +1328,7 @@ template <> inline SEXP wrap(const plant::ES20_Strategy& x) {
   ret["a_dG2"] = Rcpp::wrap(x.a_dG2);
   ret["t_s"] = Rcpp::wrap(x.t_s);
   ret["a_s"] = Rcpp::wrap(x.a_s);
-  ret["b_s"] = Rcpp::wrap(x.b_s);
+  ret["b_s1"] = Rcpp::wrap(x.b_s1);
   ret["height_0"] = Rcpp::wrap(x.height_0);
   ret["control"] = Rcpp::wrap(x.control);
   ret["collect_all_auxillary"] = Rcpp::wrap(x.collect_all_auxillary);
@@ -1396,8 +1408,8 @@ template <> inline plant::ES20_Strategy as(SEXP x) {
   ret.t_s = Rcpp::as<double >(xl["t_s"]);
   // ret.a_s = Rcpp::as<decltype(reta_s) >(xl["a_s"]);
   ret.a_s = Rcpp::as<double >(xl["a_s"]);
-  // ret.b_s = Rcpp::as<decltype(retb_s) >(xl["b_s"]);
-  ret.b_s = Rcpp::as<double >(xl["b_s"]);
+  // ret.b_s1 = Rcpp::as<decltype(retb_s1) >(xl["b_s1"]);
+  ret.b_s1 = Rcpp::as<double >(xl["b_s1"]);
   // ret.height_0 = Rcpp::as<decltype(retheight_0) >(xl["height_0"]);
   ret.height_0 = Rcpp::as<double >(xl["height_0"]);
   // ret.control = Rcpp::as<decltype(retcontrol) >(xl["control"]);

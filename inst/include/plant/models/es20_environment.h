@@ -12,6 +12,7 @@
 #include <Rcpp.h>
 
 #include <random>
+#include <iostream>
 
 using namespace Rcpp;
 
@@ -83,6 +84,7 @@ public:
 
   template <typename Function>
   void compute_environment(Function f_compute_competition, double height_max) {
+    std::cout << "Compute Environment: Time     "   << time << std::endl;
     const double lower_bound = 0.0;
     double upper_bound = height_max;
 
@@ -131,7 +133,7 @@ public:
   
   bool stressed() const {
     double yr = floor(time);
-    if(time_in_year() < stress_regime[yr]){
+    if(time < stress_regime[yr]){
       return false;
     }
     else{
@@ -151,6 +153,21 @@ public:
     }
     else{
       return 1/(1 + exp(-k_s * (time - yr_next)));
+    }
+  }
+  
+  double getStress_at_time(double t) const {
+    double yr = floor(t);
+    double yr_next = yr+1;
+    double tcrit = stress_regime[yr];
+    if(t < (yr + tcrit)/2){
+      return 1/(1 + exp(-k_s * (t - yr)));
+    }
+    else if(t < (tcrit+yr_next)/2){
+      return 1/(1 + exp(k_s * (t - tcrit)));
+    }
+    else{
+      return 1/(1 + exp(-k_s * (t - yr_next)));
     }
   }
   

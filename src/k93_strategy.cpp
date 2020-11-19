@@ -33,7 +33,7 @@ void K93_Strategy::update_dependent_aux(const int index, Internals& vars) {
   if (index == HEIGHT_INDEX) {
     double height = vars.state(HEIGHT_INDEX);
     vars.set_aux(aux_index.at("competition_effect"),
-                 compute_competition(0.0, height));
+                 compute_competition(0.0, vars));
   }
 }
 
@@ -47,8 +47,8 @@ double K93_Strategy::Q(double z, double size) const {
   return tmp * tmp;
 }
 
-double K93_Strategy::compute_competition(double z, double size) const {
-
+double K93_Strategy::compute_competition(double z, const Internals& vars) const {
+  double size = vars.state(HEIGHT_INDEX);
   // Competition only felt if plant bigger than target size z
   return size_to_basal_area(size) * Q(z, size);
  };

@@ -59,7 +59,7 @@ public:
 
   double mortality_dt(double productivity_area, double cumulative_mortality) const;
 
-  double compute_competition(double z, double size) const;
+  double compute_competition(double z, const Internals& vars) const;
 
   double initial_size(void) const;
 

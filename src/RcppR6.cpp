@@ -3777,6 +3777,14 @@ bool ES20_Environment__stressed(plant::RcppR6::RcppR6<plant::ES20_Environment> o
   return obj_->stressed();
 }
 // [[Rcpp::export]]
+double ES20_Environment__getStress(plant::RcppR6::RcppR6<plant::ES20_Environment> obj_) {
+  return obj_->getStress();
+}
+// [[Rcpp::export]]
+double ES20_Environment__getStress_at_time(plant::RcppR6::RcppR6<plant::ES20_Environment> obj_, double t) {
+  return obj_->getStress_at_time(t);
+}
+// [[Rcpp::export]]
 void ES20_Environment__reset_stress_random(plant::RcppR6::RcppR6<plant::ES20_Environment> obj_, double new_mean, double new_sd) {
   obj_->reset_stress_random(new_mean, new_sd);
 }

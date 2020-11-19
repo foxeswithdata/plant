@@ -67,7 +67,13 @@ public:
       "height_adjustment", 
       "mass_sapwood_difference",
       "mass_sapwood_adjustment",
-      "fecundity_dt_abs"
+      "fecundity_dt_abs",
+      "storage_portion",
+      "dead_flag",
+      "mortality_storage_dependent_dt",
+      "mortality_growth_dependent_dt",
+      "productivity_area",
+      "stress"
     });
     return ret;
   }
@@ -82,8 +88,8 @@ public:
     /* return area_leaf_state(vars); */
   /* } */
 
-  double compute_competition(double z, double height) const {
-    return area_leaf_above(z, height);
+  double compute_competition(double z, const Internals& vars) const {
+    return area_leaf_above(z, vars.state(HEIGHT_INDEX), vars.state(AREA_LEAF_INDEX));
   }
 
   void refresh_indices();
@@ -125,6 +131,9 @@ public:
   double dbiomass_dt(const ES20_Environment& environment, double mass_storage) const;
   
   double dmass_storage_dt(double net_mass_production_dt_, double dbiomass_dt_ ) const;
+  
+  double storage_portion(double mass_storage, double mass_leaf, double mass_bark, double mass_sapwood,
+                         double mass_root) const;
   
   void compute_rates(const ES20_Environment& environment, bool reuse_intervals,
                 Internals& vars);
@@ -213,15 +222,16 @@ public:
   double height_given_mass_leaf(double mass_leaf_) const;
   
   
-  double mortality_dt(double storage_portion, double cumulative_mortality) const;
+  double mortality_dt(double storage_portion, double productivity_area, const ES20_Environment& environment, double cumulative_mortality) const;
   double mortality_growth_independent_dt()const ;
-  double mortality_growth_dependent_dt(double storage_portion) const;
+  double mortality_storage_dependent_dt(double storage_portion) const;
+  double mortality_growth_dependent_dt(double productivity_area, const ES20_Environment& environment) const;
   // [eqn 20] Survival of seedlings during establishment
   double establishment_probability(const ES20_Environment& environment);
   
   // * Competitive environment
   // [eqn 11] total leaf area above height above height `z` for given plant
-  double area_leaf_above(double z, double height) const;
+  double area_leaf_above(double z, double height, double area_leaf) const;
   // [eqn 10] Fraction of leaf area above height `z`
   double Q(double z, double height) const;
 
@@ -272,6 +282,10 @@ public:
   double a_d0;
   // Baseline structural mortality rate
   double d_I;
+  // Baseline for storage mortality rate
+  double a_dS1;
+  // Coefficient for storage production in mortality function
+  double a_dS2;
  // Baseline for growth mortality rate
   double a_dG1;
   // Coefficient for dry mass production in mortality function
@@ -283,7 +297,9 @@ public:
   // Proportion of storage allocated to biomass
   double a_s;
   // Proportion of storage as related to initial biomass
-  double b_s;
+  double b_s1;
+  // Speed of growth switch
+  double b_s2;
   
   // Height and leaf area of a (germinated) seed
   double height_0;

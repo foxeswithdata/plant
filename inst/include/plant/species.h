@@ -8,6 +8,8 @@
 #include <plant/ode_interface.h>
 #include <plant/cohort.h>
 
+#include <iostream>
+
 namespace plant {
 
 // This is purely for running the deterministic model.
@@ -142,10 +144,12 @@ double Species<T,E>::compute_competition(double height) const {
   double tot = 0.0;
   cohorts_const_iterator it = cohorts.begin();
   double h1 = it->height(), f_h1 = it->compute_competition(height);
-
+  
   // Loop over cohorts
   for (++it; it != cohorts.end(); ++it) {
     const double h0 = it->height(), f_h0 = it->compute_competition(height);
+    // std::cout << "height: " << h0 << "   competition: f_h0 " << f_h0 << std::endl;
+    // std::cout << "density: " << it->get_log_density() << std::endl;
     if (!util::is_finite(f_h0)) {
       util::stop("Detected non-finite contribution");
     }

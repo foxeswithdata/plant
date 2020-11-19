@@ -22,3 +22,23 @@ get_non_stressed_plant_ES20 <- function(){
   
   return(pl_1_es <- ES20_Individual(s = p1_es$strategies[[1]]))
 }
+
+
+get_random_environment <- function(control, max_time, stress_mean, stress_sd){
+  stress_regime <- get_stress_regime(max_time, stress_mean, stress_sd)
+  
+  return(assign_random_environment(control, stress_regime))
+}
+
+assign_random_environment <- function(control, stress_regime){
+  control$stress_regime <- stress_regime
+  control$generate_stress <- FALSE
+  return(control)
+}
+
+
+get_stress_regime <- function(max_time, stress_mean, stress_sd){
+  stress_regime <- rnorm(max_time, stress_mean, stress_sd) + 1:max_time -1
+  return(stress_regime)
+}
+
